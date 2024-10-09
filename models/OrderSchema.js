@@ -25,12 +25,16 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "completed", "shipped", "cancelled"],
+      enum: ["pending", "kyc_verified", "shipped", "cancelled", "delivered"],
       default: "pending",
     },
     orderDate: {
       type: Date,
       default: Date.now,
+    },
+    endDate: {
+      type: Date,
+      default: () => Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 days after now
     },
     shippingCost: {
       type: Number,

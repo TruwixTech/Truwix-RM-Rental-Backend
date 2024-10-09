@@ -17,7 +17,16 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["appliance", "sofa", "kitchen", "storage", "bed", "bath", "chair"],
+      enum: [
+        "appliance",
+        "sofa",
+        "kitchen",
+        "storage",
+        "bed",
+        "bath",
+        "chair",
+        "table",
+      ],
       required: [true, "Product category is required"],
       index: true,
     },
@@ -79,6 +88,7 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
+const Product =
+  mongoose.models.Product || mongoose.model("Product", productSchema);
 
 module.exports = Product;

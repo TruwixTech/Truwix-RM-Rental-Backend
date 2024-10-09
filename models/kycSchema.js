@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-// Define KYC Schema with timestamps enabled
 const kycSchema = new mongoose.Schema(
   {
     userId: {
@@ -10,28 +9,18 @@ const kycSchema = new mongoose.Schema(
     },
     documents: [
       {
-        documentType: { type: String, required: true }, // e.g., Passport, License, etc.
-        documentUrl: { type: String, required: true }, // URL to the uploaded document
-        uploadedAt: { type: Date, default: Date.now }, // Timestamp when the document was uploaded
+        documentType: { type: String, required: true },
+        documentUrl: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now },
       },
     ],
-    kycStatus: {
-      type: String,
-      enum: ["Pending", "Approved", "Rejected"],
-      default: "Pending",
-    },
+    kycStatus: { type: String, default: "Pending" },
+    alternateNumber: { type: String, required: true }, // Ensure this is required
+    currentAddress: { type: String, required: true }, // Ensure this is required
   },
   { timestamps: true }
-); // Enables createdAt and updatedAt fields
+);
 
-// Ensure a max of 5 documents
-kycSchema.pre("save", function (next) {
-  if (this.documents.length > 5) {
-    throw new Error("Max 5 Documents Allowed.");
-  }
-  next();
-});
-
-// Export KYC Model
 const KYC = mongoose.model("KYC", kycSchema);
+
 module.exports = KYC;

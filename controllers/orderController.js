@@ -10,10 +10,9 @@ const User = require("../models/User");
 
 exports.createOrder = async (req, res) => {
   try {
-    const { pincodeTo, cartTotal, shippingCost, cartItems, address } = req.body;
+    const { cartTotal, shippingCost, address } = req.body;
     const userId = req?.user?.id;
     console.log("User ID:", userId);
-    console.log("Pincode To:", pincodeTo);
 
     // Check if user is authenticated
     if (!userId) {
@@ -55,80 +54,20 @@ exports.createOrder = async (req, res) => {
     }));
     console.log("Products in the cart:", products);
 
-    // // Array to store product sizes for shipping cost calculation
-    // let productSizeArray = [];
-
-    // // Loop through products and calculate total price
-    // for (let i = 0; i < products.length; i++) {
-    //   const product = await Product.findById(products[i].product);
-    //   console.log(`Product ${i + 1}:`, product);
-
-    //   // Check if the product exists and has valid rent price for the given months
-    //   const rentOption = product.rentalOptions[`rent${products[i].rentMonthsCount}Months`];
-    //   if (!product || !rentOption || !products[i].quantity) {
-    //     console.log("Product information missing or invalid rental price/quantity");
-    //     return res.json({
-    //       success: false,
-    //       error: "Product information missing or invalid rental price/quantity",
-    //     });
-    //   }
-
-    //   // Calculate total price based on the rent
-    //   totalPrice += parseFloat(rentOption) * products[i].quantity;
-    //   console.log("Current total price:", totalPrice);
-
-    //   // Collect product sizes
-    //   productSizeArray.push(product.size);
-    // }
-
-    // console.log("Product size array:", productSizeArray);
-
-    // // Check if multiple product sizes exist in the cart
-    // const productSizeSet = new Set(productSizeArray);
-    // console.log("Unique product sizes in the cart:", productSizeSet.size);
-
-    // if (productSizeSet.size > 1) {
-    //   console.log("Products of different sizes cannot be ordered together");
-    //   return res.json({
-    //     success: false,
-    //     error: "Products of different sizes cannot be ordered together",
-    //   });
-    // }
-
-    // // Calculate shipping cost based on product size and distance
-    // if (products.length <= 3) {
-    //   shippingCost = COST_MAPPING[3][productSizeArray[0]].rs * distance;
-    // } else {
-    //   shippingCost = COST_MAPPING[6][productSizeArray[0]].rs * distance;
-    // }
-
-    // console.log("Calculated shipping cost:", shippingCost);
-
-    // // Calculate total cost
-    // const totalCost = {
-    //   totalCost: cartTotal,
-    //   shippingCost: shippingCost,
-    //   distance: distance,
-    //   productCost: totalPrice,
-    //   finalCost: totalPrice + shippingCost,
-    // };
-
-    // console.log("Total cost breakdown:", totalCost);
-
     // Set expected delivery date
     const expectedDelivery = moment().add(7, "days");
-    console.log("Expected delivery date:", expectedDelivery);
+    // console.log("Expected delivery date:", expectedDelivery);
 
     // Create the order
     const order = await Order.create({
       user: userId,
       products,
-      totalPrice: cartTotal,
+      totalPrice: cartTotal.toFixed(2),
       shippingCost,
       shippingAddress: address,
       expectedDelivery,
     });
-    console.log("Order created successfully:", order);
+    // console.log("Order created successfully:", order);
 
     // Save the order
     await order.save();
@@ -136,11 +75,11 @@ exports.createOrder = async (req, res) => {
     // Create a payment entry for the order
     const paymentSchema = await Payment.create({
       orderId: order._id,
-      amount: cartTotal,
+      amount: cartTotal.toFixed(2),
       currency: "INR",
       userId: userId,
     });
-    console.log("Payment entry created:", paymentSchema);
+    // console.log("Payment entry created:", paymentSchema);
 
     // Save the payment entry
     await paymentSchema.save();
@@ -159,94 +98,6 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// old one
-// exports.createOrder = async (req, res) => {
-//   try {
-//     const { pincodeTo } = req.body;
-//     const userId = req?.user?.id;
-//     if (!req?.user?.id) {
-//       return res.json({
-//         success: false,
-//         error: "Unauthorized access",
-//       });
-//     }
-//     const pincodeFrom = 221304;
-//     var address = await User.findById(userId);
-//     address = address.address;
-//     address = address.find((add) => add.pincode === pincodeTo);
-//     const cart = await CartSchema.findOne({ user: userId }).populate(
-//       "items.product"
-//     );
-//     if (!cart) {
-//       return res.json({
-//         success: false,
-//         error: "Cart not found",
-//       });
-//     }
-//     const products = cart.items.map((item) => ({
-//       product: item.product._id,
-//       quantity: item.quantity,
-//       expirationDate: moment().add(7, "days"),
-//     }));
-//     let totalPrice = 0;
-//     let shippingCost = 0;
-//     const Pincode_ = new Pincode();
-//     const distance = Pincode_.getDistance(
-//       parseInt(pincodeTo),
-//       parseInt(pincodeFrom)
-//     );
-//     let productSizeArray = [];
-//     for (let i = 0; i < products.length; i++) {
-//       const product = await Product.findById(products[i].product);
-//       totalPrice += product.buyPrice * products[i].quantity;
-//       productSizeArray.push(product.size);
-//     }
-//     const productSizeSet = new Set(productSizeArray);
-//     if (productSizeSet.size > 1) {
-//       return res.json({
-//         success: false,
-//         error: "Products of different sizes cannot be ordered together",
-//       });
-//     } else {
-//       if (products.length <= 3) {
-//         shippingCost = COST_MAPPING[3][productSizeArray[0]].rs * distance;
-//       } else {
-//         shippingCost = COST_MAPPING[6][productSizeArray[0]].rs * distance;
-//       }
-//     }
-
-//     const totalCost = {
-//       totalCost: totalPrice,
-//       shippingCost: shippingCost,
-//       distance: distance,
-//       productCost: totalPrice,
-//       finalCost: totalPrice + shippingCost,
-//     };
-//     const expectedDelivery = moment().add(7, "days");
-//     const order = await Order.create({
-//       user: userId,
-//       products,
-//       totalPrice: parseInt(totalCost.finalCost),
-//       shippingCost,
-//       shippingAddress: address,
-//       expectedDelivery,
-//     });
-//     await order.save();
-//     const paymentSchema = await Payment.create({
-//       orderId: order._id,
-//       amount: parseInt(order.finalCost),
-//       currency: "INR",
-//     });
-//     await paymentSchema.save();
-//     //clear user cart
-
-//     return res.json({ success: true, data: order });
-//   } catch (error) {
-//     console.error("Error creating order:", error);
-//     res.json({ success: false, error: error.message });
-//   }
-// };
-
 exports.getOrders = async (req, res) => {
   try {
     const orders = await Order.find()
@@ -257,6 +108,20 @@ exports.getOrders = async (req, res) => {
     res.status(400).json({ success: false, error: error.message });
   }
 };
+
+exports.getMyOrders = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the user id from the request parameters
+    const orders = await Order.find({ user: id }) // Filter orders by user ID
+      .populate("user")
+      .populate("products.product");
+    
+    res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
 
 exports.getOrderById = async (req, res) => {
   try {
@@ -276,15 +141,18 @@ exports.updateOrder = async (req, res) => {
   console.log("Received update request for order");
 
   try {
-    const { status, orderDate } = req.body;
+    const { status, orderDate, endDate } = req.body;
 
     // Validate that at least one field is being updated
     if (status === undefined && !orderDate) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Please provide status or orderDate to update" 
+      return res.status(400).json({
+        success: false,
+        error: "Please provide status or orderDate to update",
       });
     }
+
+    console.log(orderDate);
+    console.log(endDate);
 
     // Find the order by ID
     const order = await Order.findById(req.params.id);
@@ -292,21 +160,20 @@ exports.updateOrder = async (req, res) => {
       return res.status(404).json({ success: false, error: "Order not found" });
     }
 
-    console.log("Order found:", order);
-
     // Update the order with conditional status update
     const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
       {
-        $set: { 
+        $set: {
           status: status !== undefined ? status : order.status, // Keep the current status if undefined
-          orderDate: orderDate || order.orderDate // Keep the current orderDate if undefined
+          orderDate: orderDate || order.orderDate, // Keep the current orderDate if undefined
+          endDate: endDate || order.endDate,
         },
       },
       { new: true, runValidators: true } // Ensure validators run
     )
-    .populate("user")
-    .populate("products.product");
+      .populate("user")
+      .populate("products.product");
 
     // Return the updated order data
     if (updatedOrder) {
@@ -315,13 +182,47 @@ exports.updateOrder = async (req, res) => {
         data: updatedOrder,
       });
     } else {
-      return res.status(404).json({ success: false, error: "Order not found after update" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Order not found after update" });
     }
   } catch (error) {
     console.error("Error updating order:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
+  try {
+    const { orderId, newStatus } = req.body;
+
+    console.log("Order id: ", orderId);
+    console.log("New Status: ", newStatus);
+
+    // Find the order by ID and update its status
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { status: newStatus },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Order status updated successfully" });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to update status" });
+  }
+};
+
 exports.deleteOrder = async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);

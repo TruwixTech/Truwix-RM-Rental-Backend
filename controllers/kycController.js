@@ -10,7 +10,8 @@ exports.updateKYCStatus = async (req, res) => {
   if (!validStatuses.includes(newStatus)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
+      message:
+        "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
     });
   }
 
@@ -44,11 +45,10 @@ exports.updateKYCStatus = async (req, res) => {
   }
 };
 
-
 exports.getAllKYC = async (req, res) => {
   try {
     const kycs = await KYC.find()
-      .populate("userId", "name email") // Populate user with specific fields (e.g., name, email)
+      .populate("userId", "name email mobileNumber") // Populate user with name and email fields
       .exec(); // Execute the query
 
     return res.status(200).json({
@@ -65,9 +65,20 @@ exports.getAllKYC = async (req, res) => {
   }
 };
 
+
 exports.uploadKYC = async (req, res) => {
   try {
     const userId = req.params.id;
+    const { alternateNumber, currentAddress } = req.body;
+
+    // Validate required fields
+    if (!alternateNumber || !currentAddress) {
+      return res.status(400).json({
+        success: false,
+        error: "alternateNumber and currentAddress are required.",
+      });
+    }
+
     const documents = []; // Declare documents array here
 
     // Check if files are received
@@ -93,12 +104,16 @@ exports.uploadKYC = async (req, res) => {
     // Update or create KYC record
     if (existingKyc) {
       existingKyc.documents.push(...documents);
+      existingKyc.alternateNumber = alternateNumber; // Update alternate number
+      existingKyc.currentAddress = currentAddress; // Update current address
       await existingKyc.save();
     } else {
       const kyc = new KYC({
         userId,
         documents,
         kycStatus: "Pending",
+        alternateNumber, // Store alternate number
+        currentAddress, // Store current address
       });
       await kyc.save();
     }

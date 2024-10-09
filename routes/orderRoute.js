@@ -11,8 +11,10 @@ router.post(
   orderController.verifyPayment
 );
 router.get("/orders", authenticate, orderController.getOrders);
+router.get("/orders/:id", authenticate, orderController.getMyOrders);
 router.get("/orders/:id", authenticate, orderController.getOrderById);
 router.put("/orders/:id", authenticate, orderController.updateOrder);
+router.put("/admin/orders/update", authenticate, orderController.updateOrderFromAdminOrdersSidebar);
 router.delete("/orders/:id", authenticate, orderController.deleteOrder);
 router.get("/order/cart", authenticate, orderController.getCart);
 router.put("/order/cart", authenticate, orderController.updateCart);

@@ -17,7 +17,8 @@ const kycSchema = new mongoose.Schema(
     kycStatus: { type: String, default: "Pending" },
     alternateNumber: { type: String, required: true }, // Ensure this is required
     currentAddress: { type: String, required: true }, // Ensure this is required
-  },
+    rejectReason: { type: String , default: "No Specified Reason"}, // New field for rejection reason
+},
   { timestamps: true }
 );
 

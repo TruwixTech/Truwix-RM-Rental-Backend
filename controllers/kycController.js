@@ -3,24 +3,26 @@ const KYC = require("../models/kycSchema");
 const User = require("../models/User");
 
 exports.updateKYCStatus = async (req, res) => {
-  const { kycId, newStatus } = req.body;
+  const { kycId, newStatus, rejectedReason } = req.body;
 
   // Check if the new status is valid
   const validStatuses = ["Pending", "Approved", "Rejected"];
   if (!validStatuses.includes(newStatus)) {
     return res.status(400).json({
       success: false,
-      message:
-        "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
+      message: "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
     });
   }
 
+  const updateFields = { kycStatus: newStatus };
+
+  // Only include rejectReason if the status is 'Rejected'
+  if (newStatus === "Rejected" && rejectedReason) {
+    updateFields.rejectReason = rejectedReason;
+  }
+
   try {
-    const kyc = await KYC.findByIdAndUpdate(
-      kycId, // The KYC record to update
-      { kycStatus: newStatus }, // Set the new status
-      { new: true } // Return the updated document
-    );
+    const kyc = await KYC.findByIdAndUpdate(kycId, updateFields, { new: true });
 
     if (!kyc) {
       return res.status(404).json({
@@ -29,14 +31,12 @@ exports.updateKYCStatus = async (req, res) => {
       });
     }
 
-    // Successfully updated the KYC status
     res.status(200).json({
       success: true,
       message: "KYC status updated successfully.",
       data: kyc,
     });
   } catch (error) {
-    // Handle any errors that occurred during the update process
     res.status(500).json({
       success: false,
       message: "An error occurred while updating the KYC status.",
@@ -45,26 +45,27 @@ exports.updateKYCStatus = async (req, res) => {
   }
 };
 
+
+
 exports.getAllKYC = async (req, res) => {
   try {
     const kycs = await KYC.find()
-      .populate("userId", "name email mobileNumber") // Populate user with name and email fields
+      .populate("userId", "name email mobileNumber") // Populate user with name, email, and mobileNumber
       .exec(); // Execute the query
 
     return res.status(200).json({
       success: true,
-      message: "Fetched all KYC records successfully",
+      message: "Fetched all KYC records successfully.",
       data: kycs,
     });
   } catch (error) {
     console.error("Error fetching KYCs:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch KYC records",
+      message: "Failed to fetch KYC records.",
     });
   }
 };
-
 
 exports.uploadKYC = async (req, res) => {
   try {
@@ -81,7 +82,7 @@ exports.uploadKYC = async (req, res) => {
 
     const documents = []; // Declare documents array here
 
-    // Check if files are received
+    // Check if files are received and process them
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         documents.push({
@@ -120,13 +121,13 @@ exports.uploadKYC = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "KYC documents uploaded successfully",
+      message: "KYC documents uploaded successfully.",
     });
   } catch (error) {
     console.error("Error uploading KYC documents:", error);
     return res.status(500).json({
       success: false,
-      error: "Internal server error",
+      error: "Internal server error.",
     });
   }
 };
@@ -148,12 +149,13 @@ exports.getKYCStatus = async (req, res) => {
       success: true,
       kycStatus: kyc.kycStatus,
       documents: kyc.documents,
+      rejectReason: kyc.rejectReason, // Include rejectReason in the response
     });
   } catch (error) {
     console.error("Error fetching KYC status:", error);
     return res.status(500).json({
       success: false,
-      error: "Internal server error",
+      error: "Internal server error.",
     });
   }
 };

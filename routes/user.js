@@ -14,6 +14,8 @@ const {
   sendWhatsAppOtp,
   verifyWhatsAppOtp,
 } = require("../controllers/otpController");
+const { getMyOrderProductNames, cancelOrder } = require("../controllers/orderController");
+
 const { uploadKYC, getKYCStatus, getAllKYC, updateKYCStatus } = require("../controllers/kycController");
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
@@ -36,6 +38,8 @@ router.delete("/address", authenticate, deleteAddress);
 
 router.get("/kyc", getAllKYC);
 router.put('/kyc', updateKYCStatus);
+router.get("/order/orders/:id", getMyOrderProductNames);
+router.put("/order/cancel/:id", cancelOrder);
 
 
 router.post("/shipping", getDistance)

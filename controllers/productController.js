@@ -139,66 +139,55 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const {
-      title,
-      sub_title,
-      buyPrice,
-      category,
-      size,
-      description,
-      fabricCare,
-      woodType,
-      seatingCapacity,
-      configType,
-      colorOptions,
-      month,
-      rentalOptions,
-      addOns,
-    } = req.body;
+    const { title, sub_title, img, category, details, rentalOptions } =
+      req.body;
 
-    let img = req.body.img;
+    const parsedDetails =
+      typeof details === "string" ? JSON.parse(details) : details;
 
+    // Extract description and month into separate variables
+    const descExtracted = parsedDetails.description;
+    const monthExtracted = Array.isArray(parsedDetails.month)
+      ? parsedDetails.month
+      : [];
+
+    console.log(img);
+
+    // Initialize img with existing images from request
+    let newImg = Array.isArray(img) ? img : [img]; // Ensure img is an array
+
+    // Add any new files uploaded to the img array
     if (req.files && req.files.length > 0) {
-      img = req.files.map(
+      const uploadedImages = req.files.map(
         (file) =>
           `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
       );
+      newImg = [...newImg, ...uploadedImages]; // Combine existing and new images
     }
 
-    const parsedFabricCare =
-      typeof fabricCare === "string" ? JSON.parse(fabricCare) : fabricCare;
-    const parsedWoodType =
-      typeof woodType === "string" ? JSON.parse(woodType) : woodType;
-    const parsedColorOptions =
-      typeof colorOptions === "string"
-        ? JSON.parse(colorOptions)
-        : colorOptions;
-    const parsedMonth = typeof month === "string" ? JSON.parse(month) : month;
+    // Filter out null, undefined, or empty images
+    newImg = newImg.filter((image) => image && image.trim() !== "");
+
+    // Parse rentalOptions if it's sent as a string
     const parsedRentalOptions =
       typeof rentalOptions === "string"
         ? JSON.parse(rentalOptions)
         : rentalOptions;
+
+    console.log(newImg);
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       {
         title,
         sub_title,
-        buyPrice,
-        img,
+        img: newImg, // Updated images array without nulls
         category,
-        size,
         details: {
-          description,
-          fabricCare: parsedFabricCare,
-          woodType: parsedWoodType,
-          seatingCapacity,
-          configType,
-          colorOptions: parsedColorOptions,
-          month: parsedMonth,
+          description: descExtracted,
+          month: monthExtracted,
         },
         rentalOptions: parsedRentalOptions,
-        addOns,
       },
       { new: true, runValidators: true }
     );

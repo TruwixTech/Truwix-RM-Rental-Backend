@@ -10,6 +10,7 @@ const productSchema = new mongoose.Schema(
     sub_title: {
       type: String,
       trim: true,
+      required: [true, "Product Sub Title is Required"]
     },
     img: {
       type: [String],
@@ -30,39 +31,40 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product category is required"],
       index: true,
     },
-    size: {
-      type: String,
-      required: [true, "Product size is required"],
-      trim: true,
-      enum: ["small", "medium", "large"],
-    },
-    reviews: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        reviewText: { type: String, required: true },
-        rating: { type: Number, required: true, min: 1, max: 5 },
-      },
-    ],
+    // size: {
+    //   type: String,
+    //   required: [true, "Product size is required"],
+    //   trim: true,
+    //   enum: ["small", "medium", "large"],
+    // },
+    // reviews: [
+    //   {
+    //     user: {
+    //       type: mongoose.Schema.Types.ObjectId,
+    //       ref: "User",
+    //       required: true,
+    //     },
+    //     reviewText: { type: String, required: true },
+    //     rating: { type: Number, required: true, min: 1, max: 5 },
+    //   },
+    // ],
     details: {
       description: { type: String },
-      fabricCare: {
-        material: { type: String },
-        color: { type: [String] },
-      },
-      woodType: {
-        material: { type: String },
-        color: { type: [String] },
-      },
-      seatingCapacity: [{ type: Number }],
-      configType: [{ type: Number }],
-      colorOptions: [{ type: String }],
+      // fabricCare: {
+      //   material: { type: String },
+      //   color: { type: [String] },
+      // },
+      // woodType: {
+      //   material: { type: String },
+      //   color: { type: [String] },
+      // },
+      // seatingCapacity: [{ type: Number }],
+      // configType: [{ type: Number }],
+      // colorOptions: [{ type: String }],
       month: {
         type: [Number],
         default: [],
+        required: true
       },
     },
     rentalOptions: {
@@ -83,7 +85,7 @@ const productSchema = new mongoose.Schema(
         default: null, // Default to null if not provided
       },
     },
-    addOns: [{ type: mongoose.Schema.Types.ObjectId, ref: "AddOn" }],
+    // addOns: [{ type: mongoose.Schema.Types.ObjectId, ref: "AddOn" }],
   },
   { timestamps: true }
 );

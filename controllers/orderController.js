@@ -115,13 +115,37 @@ exports.getMyOrders = async (req, res) => {
     const orders = await Order.find({ user: id }) // Filter orders by user ID
       .populate("user")
       .populate("products.product");
-    
+
     res.status(200).json({ success: true, data: orders });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
 };
 
+exports.getMyOrderProductNames = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId).populate(
+      "products.product",
+      "title"
+    );
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Extract product titles from the order and return as an array
+    const productTitles = order.products.map((item) => item.product.title);
+
+    // Return the array of product names
+    res.json(productTitles);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 exports.getOrderById = async (req, res) => {
   try {
@@ -134,6 +158,49 @@ exports.getOrderById = async (req, res) => {
     res.status(200).json({ success: true, data: order });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+exports.cancelOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    // Ensure orderId is provided
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide the orderId",
+      });
+    }
+
+    // Find the order by ID and update the status to "cancelled"
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      {
+        $set: {
+          status: "cancelled", // Set status to 'cancelled'
+        },
+      },
+      { new: true, runValidators: true } // Ensure validators run
+    );
+
+    // Return the updated order data
+    if (updatedOrder) {
+      return res.status(200).json({
+        success: true,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        error: "Order not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error updating order:", error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 

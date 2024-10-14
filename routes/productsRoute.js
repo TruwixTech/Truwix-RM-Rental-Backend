@@ -29,8 +29,11 @@ router.put(
   "/:id",
   authenticate,
   authorizeAdmin,
+  upload.array("newImages", 5), // Handle up to 5 new images
   productsController.updateProduct
 );
+
+
 router.delete(
   "/:id",
   authenticate,

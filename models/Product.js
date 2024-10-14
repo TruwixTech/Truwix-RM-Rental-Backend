@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema(
     sub_title: {
       type: String,
       trim: true,
-      required: [true, "Product Sub Title is Required"]
+      required: [true, "Product Sub Title is Required"],
     },
     img: {
       type: [String],
@@ -20,12 +20,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       enum: [
         "appliance",
-        "sofa",
-        "kitchen",
+        "livingroom",
         "storage",
-        "bed",
-        "bath",
-        "chair",
+        "studyroom",
+        "bedroom",
         "table",
       ],
       required: [true, "Product category is required"],
@@ -64,7 +62,7 @@ const productSchema = new mongoose.Schema(
       month: {
         type: [Number],
         default: [],
-        required: true
+        required: true,
       },
     },
     rentalOptions: {

@@ -13,19 +13,18 @@ exports.createProduct = async (req, res) => {
       category,
       img = [],
       description,
-      fabricCare,
-      woodType,
-      seatingCapacity,
-      configType,
-      colorOptions,
+      // fabricCare,
+      // woodType,
+      // seatingCapacity,
+      // configType,
+      // colorOptions,
       month,
-      size,
+      // size,
       rent3Months,
       rent6Months,
       rent9Months,
       rent12Months,
     } = req.body;
-
 
     let productImages = img;
 
@@ -41,10 +40,10 @@ exports.createProduct = async (req, res) => {
     }
 
     // Check for required fields
-    if (!title || !category || !size) {
+    if (!title || !category || !month || !img) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields: title, category, size.",
+        error: "All Fields Are Necessary",
       });
     }
 
@@ -54,20 +53,20 @@ exports.createProduct = async (req, res) => {
       sub_title,
       img: productImages,
       category,
-      size,
+      // size,
       details: {
         description: description,
-        fabricCare: {
-          material: fabricCare?.material,
-          color: fabricCare?.color,
-        },
-        woodType: {
-          material: woodType?.material,
-          color: woodType?.color,
-        },
-        seatingCapacity: seatingCapacity,
-        configType: configType,
-        colorOptions: colorOptions,
+        // fabricCare: {
+        //   material: fabricCare?.material,
+        //   color: fabricCare?.color,
+        // },
+        // woodType: {
+        //   material: woodType?.material,
+        //   color: woodType?.color,
+        // },
+        // seatingCapacity: seatingCapacity,
+        // configType: configType,
+        // colorOptions: colorOptions,
         month: month,
       },
       rentalOptions: {
@@ -77,7 +76,6 @@ exports.createProduct = async (req, res) => {
         rent12Months: rent12Months ? rent12Months : null,
       },
     });
-
 
     // Save the product to the database
     await product.save();
@@ -94,8 +92,6 @@ exports.createProduct = async (req, res) => {
     });
   }
 };
-
-
 
 exports.getProducts = async (req, res) => {
   try {
@@ -253,5 +249,26 @@ exports.searchProducts = async (req, res) => {
     res.json({ success: true, data: products });
   } catch (error) {
     res.json({ success: false, error: error.message });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  const productId = req.params.id;
+
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      return res.status(404).send({ message: "Product not found" });
+    }
+
+    res.send({
+      message: "Product deleted successfully",
+      product: deletedProduct,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ message: "Error deleting product", error: error.message });
   }
 };

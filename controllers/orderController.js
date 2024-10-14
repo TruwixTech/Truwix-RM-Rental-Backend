@@ -205,7 +205,6 @@ exports.cancelOrder = async (req, res) => {
 };
 
 exports.updateOrder = async (req, res) => {
-  console.log("Received update request for order");
 
   try {
     const { status, orderDate, endDate } = req.body;

@@ -8,7 +8,7 @@ const swaggerFile = require("./swagger_output.json");
 
 const allowedOrigins = [
   "http://localhost:5173", // for development
-  "https://rm-rental-frontend-website.vercel.app",
+  "https://rmrental-backend.vercel.app",
   "https://rmfurniturerental.in" // for production
 ];
 

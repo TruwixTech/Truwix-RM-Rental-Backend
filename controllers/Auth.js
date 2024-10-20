@@ -3,6 +3,38 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { mobileNumber, newPassword } = req.body;
+
+    // Find the user by mobile number
+    const user = await User.findOne({ mobileNumber });
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Account does not exist!" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong, please try again",
+    });
+  }
+};
+
+
 exports.signup = async (req, res) => {
   try {
     const { name, email, password, mobileNumber } = req.body;

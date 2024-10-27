@@ -1,7 +1,54 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 require("dotenv").config();
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const gpiclient = new OAuth2Client(googleClientId);
+
+exports.googleOAuth = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await gpiclient.verifyIdToken({
+      idToken: token,
+      audience: googleClientId,
+    });
+
+    const { email, name, sub: googleId } = ticket.getPayload();
+
+    const user = await User.findOneAndUpdate(
+      { googleId },
+      { name, email, googleId },
+      { new: true, upsert: true }
+    );
+
+    const jwtToken = jwt.sign(
+      {
+        id: user?._id,
+        email: user?.email,
+        name: user?.name,
+        role: user?.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.status(200).json({
+      message: "Google login successful",
+      token: jwtToken,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(401).json({ error: "Google authentication failed" });
+  }
+};
 
 exports.forgotPassword = async (req, res) => {
   try {
@@ -9,9 +56,11 @@ exports.forgotPassword = async (req, res) => {
 
     // Find the user by mobile number
     const user = await User.findOne({ mobileNumber });
-    
+
     if (!user) {
-      return res.status(404).json({ success: false, message: "Account does not exist!" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Account does not exist!" });
     }
 
     // Hash the new password
@@ -33,7 +82,6 @@ exports.forgotPassword = async (req, res) => {
     });
   }
 };
-
 
 exports.signup = async (req, res) => {
   try {

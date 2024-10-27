@@ -9,6 +9,7 @@ const {
   deleteAddress,
   addAddress,
   forgotPassword,
+  googleOAuth,
 } = require("../controllers/Auth");
 const { authenticate } = require("../middlewares/authMiddleware");
 const {
@@ -31,6 +32,7 @@ const { storage } = require("../config/cloudinary");
 const upload = multer({ storage });
 const { getDistance } = require("../controllers/shippingController");
 
+router.post("/oauth", googleOAuth);
 router.post("/login", login);
 router.post("/signup", signup);
 router.patch("/password", forgotPassword);

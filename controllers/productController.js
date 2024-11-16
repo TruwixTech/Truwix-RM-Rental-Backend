@@ -240,15 +240,40 @@ exports.getProductCount = async (req, res) => {
   }
 };
 
+// exports.searchProducts = async (req, res) => {
+//   try {
+//     const { query } = req.body;
+//     const products = await Product.find({
+//       title: { $regex: query, $options: "i" },
+//     });
+//     res.json({ success: true, data: products });
+//   } catch (error) {
+//     res.json({ success: false, error: error.message });
+//   }
+// };
+
 exports.searchProducts = async (req, res) => {
   try {
-    const { query } = req.body;
+    const query = req.query.query;
+    console.log("query", req.query);
+
+    if (!query) {
+      return res.status(400).json({ message: 'Query parameter is required' });
+    }
+
+    // Search products whose title contains the query (case-insensitive)
     const products = await Product.find({
-      title: { $regex: query, $options: "i" },
-    });
-    res.json({ success: true, data: products });
+      title: { $regex: query, $options: 'i' },
+    }).select('title _id'); // Return both the title and id
+
+    // Send an array of products containing both id and title
+    res.json(products.map((product) => ({
+      id: product._id,
+      title: product.title
+    })));
   } catch (error) {
-    res.json({ success: false, error: error.message });
+    console.error("Error searching products:", error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

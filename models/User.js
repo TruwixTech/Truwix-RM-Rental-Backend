@@ -17,12 +17,12 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
       minlength: 8,
     },
     mobileNumber: {
       type: Number,
-      required: true,
+      // required: true,
       length: 10,
     },
     role: {
@@ -31,6 +31,7 @@ const userSchema = mongoose.Schema(
       default: "User",
       required: true,
     },
+    googleId: String, 
     address: {
       type: Array,
       default: [],

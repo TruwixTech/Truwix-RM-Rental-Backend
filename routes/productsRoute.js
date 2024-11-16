@@ -15,6 +15,8 @@ const upload = multer({ storage });
 // router.use(authenticate);
 
 // Product routes
+router.get('/search', productsController.searchProducts);
+
 router.post(
   "/",
   authenticate,
@@ -52,6 +54,7 @@ router.get("/:id/reviews", authenticate, reviewsController.getReviews);
 
 // POST route to handle file upload
 //router.post("/upload", upload.single("image"), uploadController.uploadImage);
-router.post("/search", productsController.searchProducts);
+// router.post("/search", productsController.searchProducts);
+
 
 module.exports = router;

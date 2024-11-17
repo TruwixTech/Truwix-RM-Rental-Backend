@@ -1,36 +1,38 @@
 const twilio = require("twilio");
-
 exports.sendWhatsAppOtp = async (req, res, next) => {
   const phone = req.params.id;
+
+  // Validate the phone number length
   if (phone.length !== 10) {
     return res.status(422).json({ message: "Invalid phone number" });
   }
+
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const serviceSid = process.env.TWILIO_AUTH_SERVICES;
+
   const client = twilio(accountSid, authToken);
 
-  const verification = await client.verify.v2
-    .services(process.env.TWILIO_AUTH_SERVICES)
-    .verifications.create({
-      channel: "whatsapp",
-      to: "+91" + phone,
-      channelConfiguration: {
-        whatsapp: {
-          enabled: true,
-        },
-      },
-    })
-    .then((resp) => {
-      // console.log(resp);
-      // console.log(resp.accountSid);
-      return res
-        .status(200)
-        .json({ message: "SMS/WhatsApp OTP Send Successfully", success: true });
-    })
-    .catch((e) => {
-      // console.log(e);
-      return res.status(404).json({ message: "Error in Sending OTP: " + e });
+  try {
+    const verification = await client.verify.v2
+      .services(serviceSid)
+      .verifications.create({
+        to: `+91${phone}`,
+        channel: "sms", // Specify WhatsApp as the channel
+      });
+
+    // Respond with success
+    return res.status(200).json({
+      message: "Verification OTP sent successfully",
+      success: true,
+      sid: verification.sid, // Optional: Provide the verification SID for tracking
     });
+  } catch (error) {
+    console.error("Error sending OTP:", error.message);
+    return res
+      .status(500)
+      .json({ message: "Error in Sending OTP", error: error.message });
+  }
 };
 
 exports.verifyWhatsAppOtp = async (req, res) => {

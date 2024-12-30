@@ -12,91 +12,93 @@ exports.createOrder = async (req, res) => {
   try {
     const { cartTotal, shippingCost, address } = req.body;
     const userId = req?.user?.id;
-    console.log("User ID:", userId);
 
-    // Check if user is authenticated
     if (!userId) {
-      console.log("Unauthorized access");
-      return res.json({
+      return res.status(401).json({
         success: false,
-        error: "Unauthorized access",
+        error: "Unauthorized access. Please log in.",
       });
     }
 
-    const pincodeFrom = 221304;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
+    }
 
-    // Fetch user address based on pincode
-    var user = await User.findById(userId);
-    console.log("User data:", user);
-
-    // Fetch the cart for the user
     const cart = await CartSchema.findOne({ user: userId }).populate(
       "items.product"
     );
-    console.log("User cart:", cart);
 
-    // Check if cart exists and has items
-    if (!cart || cart.items.length === 0) {
-      console.log("Cart is empty or not found");
-      return res.json({
+    if (!cart || !cart.items.length) {
+      return res.status(400).json({
         success: false,
-        error: "Cart is empty or not found",
+        error: "Cart is empty or does not exist.",
       });
     }
 
-    // Prepare products array from cart items, including rental details
     const products = cart.items.map((item) => ({
       product: item.product._id,
-      quantity: item.rentOptions.quantity,
-      rentMonthsCount: item.rentOptions.rentMonthsCount,
-      rentMonths: item.rentOptions.rentMonths,
-      expirationDate: moment().add(item.rentOptions.rentMonthsCount, "months"), // Setting expiration based on rental months
+      quantity: item.rentOptions?.quantity || 1,
+      expirationDate: moment().add(item.rentOptions?.rentMonthsCount || 0, "months"),
     }));
-    console.log("Products in the cart:", products);
 
-    // Set expected delivery date
     const expectedDelivery = moment().add(7, "days");
-    // console.log("Expected delivery date:", expectedDelivery);
 
-    // Create the order
-    const order = await Order.create({
+    const order = new Order({
       user: userId,
       products,
-      totalPrice: cartTotal.toFixed(2),
-      shippingCost,
+      totalPrice: parseFloat(cartTotal).toFixed(2),
+      shippingCost: shippingCost || 0,
       shippingAddress: address,
       expectedDelivery,
     });
-    // console.log("Order created successfully:", order);
 
-    // Save the order
+    // Explicitly generate order number if not set
+    if (!order.orderNumber) {
+      const lastOrder = await Order.findOne().sort({ createdAt: -1 });
+      let nextNumber = 1;
+
+      if (lastOrder && lastOrder.orderNumber) {
+        const lastNumber = parseInt(lastOrder.orderNumber.slice(4));
+        nextNumber = lastNumber + 1;
+      }
+
+      const paddedNumber = nextNumber.toString().padStart(6, "0");
+      order.orderNumber = `RMOR${paddedNumber}`;
+    }
+
     await order.save();
 
-    // Create a payment entry for the order
-    const paymentSchema = await Payment.create({
+    const paymentEntry = new Payment({
       orderId: order._id,
-      amount: cartTotal.toFixed(2),
+      amount: parseFloat(cartTotal).toFixed(2),
       currency: "INR",
-      userId: userId,
+      userId,
     });
-    // console.log("Payment entry created:", paymentSchema);
 
-    // Save the payment entry
-    await paymentSchema.save();
+    await paymentEntry.save();
 
-    // Return the successful order data
-    return res.json({
+    return res.status(201).json({
       success: true,
-      data: order,
+      data: {
+        orderNumber: order.orderNumber,
+        orderDetails: order,
+      },
     });
   } catch (error) {
     console.error("Error creating order:", error);
-    return res.json({
+
+    return res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message || "An error occurred while creating the order.",
     });
   }
 };
+
+
 
 exports.getOrders = async (req, res) => {
   try {

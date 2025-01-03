@@ -18,11 +18,25 @@ exports.googleOAuth = async (req, res) => {
 
     const { email, name, sub: googleId } = ticket.getPayload();
 
+    const lastUser = await User.findOne().sort({ createdAt: -1 });
+
+    let nextNumber = 1;
+    if (lastUser && lastUser.customerId) {
+      const lastNumber = parseInt(lastUser.customerId.slice(4));
+      nextNumber = lastNumber + 1;
+    }
+
+    const paddedNumber = nextNumber.toString().padStart(6, "0");
+    const customerId = `CUST${paddedNumber}`;
+
+
     const user = await User.findOneAndUpdate(
       { googleId },
-      { name, email, googleId },
+      { name, email, googleId, customerId },
       { new: true, upsert: true }
     );
+
+    // Explicitly generate Customer ID if not set
 
     const jwtToken = jwt.sign(
       {
@@ -96,12 +110,24 @@ exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const lastUser = await User.findOne().sort({ createdAt: -1 });
+
+    let nextNumber = 1;
+    if (lastUser && lastUser.customerId) {
+      const lastNumber = parseInt(lastUser.customerId.slice(4));
+      nextNumber = lastNumber + 1;
+    }
+
+    const paddedNumber = nextNumber.toString().padStart(6, "0");
+    const customerId = `CUST${paddedNumber}`;
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       mobileNumber: mobileNumber,
       role: "User",
+      customerId,
     });
     await user.save();
 

@@ -9,6 +9,10 @@ const userSchema = mongoose.Schema(
       minlength: 3,
       maxlength: 50,
     },
+    customerId: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -31,7 +35,7 @@ const userSchema = mongoose.Schema(
       default: "User",
       required: true,
     },
-    googleId: String, 
+    googleId: String,
     address: {
       type: Array,
       default: [],

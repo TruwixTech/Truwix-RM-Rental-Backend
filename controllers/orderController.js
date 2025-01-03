@@ -47,28 +47,26 @@ exports.createOrder = async (req, res) => {
 
     const expectedDelivery = moment().add(7, "days");
 
-    const order = new Order({
+    const lastOrder = await Order.findOne().sort({ createdAt: -1 });
+    let nextNumber = 1;
+
+    if (lastOrder && lastOrder.orderNumber) {
+      const lastNumber = parseInt(lastOrder.orderNumber.slice(4));
+      nextNumber = lastNumber + 1;
+    }
+
+    const paddedNumber = nextNumber.toString().padStart(6, "0");
+    const orderNumber = `RMOR${paddedNumber}`;
+
+    const order = Order({
       user: userId,
       products,
       totalPrice: parseFloat(cartTotal).toFixed(2),
       shippingCost: shippingCost || 0,
       shippingAddress: address,
       expectedDelivery,
+      orderNumber,
     });
-
-    // Explicitly generate order number if not set
-    if (!order.orderNumber) {
-      const lastOrder = await Order.findOne().sort({ createdAt: -1 });
-      let nextNumber = 1;
-
-      if (lastOrder && lastOrder.orderNumber) {
-        const lastNumber = parseInt(lastOrder.orderNumber.slice(4));
-        nextNumber = lastNumber + 1;
-      }
-
-      const paddedNumber = nextNumber.toString().padStart(6, "0");
-      order.orderNumber = `RMOR${paddedNumber}`;
-    }
 
     await order.save();
 
@@ -80,6 +78,7 @@ exports.createOrder = async (req, res) => {
     });
 
     await paymentEntry.save();
+    console.log(order);
 
     return res.status(201).json({
       success: true,

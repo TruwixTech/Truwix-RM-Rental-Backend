@@ -51,7 +51,9 @@ const product = require("./routes/productsRoute");
 app.use("/api/products", product);
 
 const order = require("./routes/orderRoute");
+const coupon = require("./routes/couponRoute");
 
+app.use("/api/coupon", coupon);
 app.use("/api", order);
 
 app.listen(PORT, () => {

@@ -159,3 +159,4 @@ exports.getKYCStatus = async (req, res) => {
     });
   }
 };
+

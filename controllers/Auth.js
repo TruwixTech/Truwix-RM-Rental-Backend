@@ -190,6 +190,30 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.userDetails = async (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide user id",
+    });
+  }
+
+  const user = await User.findById(id).populate("orders")
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+}
+
 exports.getUserCount = async (req, res) => {
   try {
     const count = await User.countDocuments();

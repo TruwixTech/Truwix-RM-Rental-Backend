@@ -19,6 +19,10 @@ const userSchema = mongoose.Schema(
       unique: true,
       trim: true,
     },
+    orders: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order"
+    }],
     password: {
       type: String,
       // required: true,

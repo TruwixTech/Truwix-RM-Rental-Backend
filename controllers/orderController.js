@@ -66,9 +66,13 @@ exports.createOrder = async (req, res) => {
       shippingAddress: address,
       expectedDelivery,
       orderNumber,
-    });
+    })
 
-    await order.save();
+    user.orders.push(order._id);
+    // await user.save();
+    // await order.save();
+
+    Promise.all([user.save(), order.save()])
 
     const paymentEntry = new Payment({
       orderId: order._id,
@@ -108,6 +112,26 @@ exports.getOrders = async (req, res) => {
     res.status(400).json({ success: false, error: error.message });
   }
 };
+
+exports.customerWithOrders = async (req, res) => {
+  try {
+    const customer = await User.find()
+      .populate("orders")
+      .populate({
+        path: "orders",
+        populate: {
+          path: "products.product", // Path to the nested field
+          model: "Product", // The model you're referencing
+        },
+      });
+    const custWthOrders = customer.filter((cust) => cust.orders.length > 0);
+    res.status(200).json({
+      custWthOrders
+    })
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+}
 
 exports.getMyOrders = async (req, res) => {
   try {

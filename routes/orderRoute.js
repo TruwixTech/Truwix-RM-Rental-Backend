@@ -11,6 +11,7 @@ router.post(
   orderController.verifyPayment
 );
 router.get("/orders", authenticate, orderController.getOrders);
+router.get("/getCustomerWithOrders", authenticate, orderController.customerWithOrders);
 router.get("/orders/:id", authenticate, orderController.getMyOrders);
 router.get("/orders/:id", authenticate, orderController.getOrderById);
 router.put("/orders/:id", authenticate, orderController.updateOrder);

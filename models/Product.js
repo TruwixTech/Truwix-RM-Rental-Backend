@@ -29,36 +29,10 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product category is required"],
       index: true,
     },
-    // size: {
-    //   type: String,
-    //   required: [true, "Product size is required"],
-    //   trim: true,
-    //   enum: ["small", "medium", "large"],
-    // },
-    // reviews: [
-    //   {
-    //     user: {
-    //       type: mongoose.Schema.Types.ObjectId,
-    //       ref: "User",
-    //       required: true,
-    //     },
-    //     reviewText: { type: String, required: true },
-    //     rating: { type: Number, required: true, min: 1, max: 5 },
-    //   },
-    // ],
+   
     details: {
       description: { type: String },
-      // fabricCare: {
-      //   material: { type: String },
-      //   color: { type: [String] },
-      // },
-      // woodType: {
-      //   material: { type: String },
-      //   color: { type: [String] },
-      // },
-      // seatingCapacity: [{ type: Number }],
-      // configType: [{ type: Number }],
-      // colorOptions: [{ type: String }],
+      
       month: {
         type: [Number],
         default: [],
@@ -83,7 +57,7 @@ const productSchema = new mongoose.Schema(
         default: null, // Default to null if not provided
       },
     },
-    // addOns: [{ type: mongoose.Schema.Types.ObjectId, ref: "AddOn" }],
+    
   },
   { timestamps: true }
 );

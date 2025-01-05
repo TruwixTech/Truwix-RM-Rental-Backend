@@ -23,8 +23,8 @@ const verifyPayment = async (req, res) => {
   const { order_id, payment_id, signature } = req.body;
 
   const hmac = crypto.createHmac(
-    "rzp_test_Lx1DFKJyuWRRZG",
-    "TpqNrmU3Bwv6UptBYZspKqBn"
+    "rzp_test_bPKH4b75rXxBKr",
+    "EcsqIxkDzv4wcMFSaobbyWiF"
   );
   hmac.update(order_id + "|" + payment_id);
   const generatedSignature = hmac.digest("hex");

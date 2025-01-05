@@ -1,4 +1,4 @@
-const WishList = require("../models/WishList");
+
 const CartSchema = require("../models/CartSchema");
 const Order = require("../models/OrderSchema");
 const Product = require("../models/Product");
@@ -8,9 +8,15 @@ const { default: Pincode } = require("pincode-distance");
 const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
 
+
 exports.createOrder = async (req, res) => {
   try {
-    const { cartTotal, shippingCost, address } = req.body;
+    const { cartTotal, cartItems, shippingCost, address } = req.body;
+
+    console.log("Cart Total: ", cartTotal);
+    console.log("Shipping Cost: ", shippingCost);
+    console.log("Address: ", address);
+    console.log("Cart Items: ", cartItems);
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -20,6 +26,8 @@ exports.createOrder = async (req, res) => {
       });
     }
 
+    console.log("User ID: access mil gya ", userId);
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -28,24 +36,35 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    const cart = await CartSchema.findOne({ user: userId }).populate(
-      "items.product"
-    );
+    console.log("User:  mil gya", user);
 
-    if (!cart || !cart.items.length) {
-      return res.status(400).json({
-        success: false,
-        error: "Cart is empty or does not exist.",
-      });
-    }
+    // const cart = await CartSchema.findOne({ user: "670d2b50127f479847778548" }).populate(
+    //   "items"
+    // );
+    // console.log(userId);
+    // console.log("Cart:  mil gya", cart);
+    
 
-    const products = cart.items.map((item) => ({
+    // if (!cart || !cart.items.length) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     error: "Cart is empty or does not exist.",
+    //   });
+    // }
+
+    // console.log("Cart Items:  mil gya", cart.items);
+
+
+
+    const products = cartItems.map((item) => ({
       product: item.product._id,
       quantity: item.rentOptions?.quantity || 1,
       expirationDate: moment().add(item.rentOptions?.rentMonthsCount || 0, "months"),
     }));
 
-    const expectedDelivery = moment().add(7, "days");
+    console.log("Products:  mil gya", products);
+
+    const expectedDelivery = moment().add(2, "days");
 
     const lastOrder = await Order.findOne().sort({ createdAt: -1 });
     let nextNumber = 1;
@@ -68,11 +87,16 @@ exports.createOrder = async (req, res) => {
       orderNumber,
     })
 
+    console.log("Order:  mil gya", order);
+
     user.orders.push(order._id);
     // await user.save();
     // await order.save();
 
     Promise.all([user.save(), order.save()])
+
+    console.log("Order Saved:  mil gya", order);
+
 
     const paymentEntry = new Payment({
       orderId: order._id,

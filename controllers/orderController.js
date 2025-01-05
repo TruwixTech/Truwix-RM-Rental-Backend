@@ -12,11 +12,6 @@ const User = require("../models/User");
 exports.createOrder = async (req, res) => {
   try {
     const { cartTotal, cartItems, shippingCost, address } = req.body;
-
-    console.log("Cart Total: ", cartTotal);
-    console.log("Shipping Cost: ", shippingCost);
-    console.log("Address: ", address);
-    console.log("Cart Items: ", cartItems);
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -26,8 +21,6 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    console.log("User ID: access mil gya ", userId);
-
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -36,26 +29,7 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    console.log("User:  mil gya", user);
-
-    // const cart = await CartSchema.findOne({ user: "670d2b50127f479847778548" }).populate(
-    //   "items"
-    // );
-    // console.log(userId);
-    // console.log("Cart:  mil gya", cart);
-    
-
-    // if (!cart || !cart.items.length) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     error: "Cart is empty or does not exist.",
-    //   });
-    // }
-
-    // console.log("Cart Items:  mil gya", cart.items);
-
-
-
+  
     const products = cartItems.map((item) => ({
       product: item.product._id,
       quantity: item.rentOptions?.quantity || 1,
@@ -124,6 +98,9 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
+
+
+
 
 exports.getOrders = async (req, res) => {
   try {
@@ -301,6 +278,33 @@ exports.updateOrder = async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating order:", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.updateOrder2 = async (req, res) => {
+  try {
+    // Find the order by ID
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    // Calculate the new endDate to be one month from today's date
+    const today = new Date();
+    const newEndDate = moment(today).add(1, "month").toDate();
+
+    // Update and save the order
+    order.endDate = newEndDate;
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Order endDate updated successfully",
+      data: order,
+    });
+  } catch (error) {
+    console.error("Error updating order endDate:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };

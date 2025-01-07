@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
+const Product = require("../models/Product");
 require("dotenv").config();
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;

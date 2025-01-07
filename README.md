@@ -1,2 +1,2 @@
-# Truwix-RM-Rental
-RM-Rental Dev Web
+# Truwix-RM-Rental-Backend
+RM-Rental Dev Web Backend

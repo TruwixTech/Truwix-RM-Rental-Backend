@@ -29,7 +29,7 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-  
+
     const products = cartItems.map((item) => ({
       product: item.product._id,
       quantity: item.rentOptions?.quantity || 1,
@@ -472,6 +472,19 @@ exports.updateCart = async (req, res) => {
     res.status(400).json({ success: false, error: error.message });
   }
 };
+
+exports.updateCartQuantity = async (req, res) => {
+  try {
+    const { userCartNewData, userId } = req.body // this will be the array of new cart data
+    
+    const cart = await CartSchema.findOne({ user: userId })
+    cart.items = userCartNewData
+    await cart.save()
+    res.status(200).json({ success: true, data: cart })
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+}
 
 exports.deleteCart = async (req, res) => {
   try {

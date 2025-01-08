@@ -16,13 +16,8 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [], // Ensures img is always an array
     },
-    costPerKm:{
-      type: Number,
-      required: [true, "Product cost per km is required"],
-    },
     size:{
       type: String,
-      required: [true, "Product size is required"],
     },
     category: {
       type: String,

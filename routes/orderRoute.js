@@ -19,6 +19,7 @@ router.put("/admin/orders/update", authenticate, orderController.updateOrderFrom
 router.delete("/orders/:id", authenticate, orderController.deleteOrder);
 router.get("/order/cart", authenticate, orderController.getCart);
 router.put("/order/cart", authenticate, orderController.updateCart);
+router.put("/order/cart/updateCart", authenticate, orderController.updateCartQuantity);
 router.delete("/order/cart", authenticate, orderController.deleteCart);
 router.post("/order/cart", authenticate, orderController.addToCart);
 router.put(

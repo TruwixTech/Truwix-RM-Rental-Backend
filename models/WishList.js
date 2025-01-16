@@ -1,15 +1,16 @@
 const mongoose = require("mongoose");
+const { USER, ITEM } = require("../utils/enum");
 
 const wishListSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: USER,
     required: true,
   },
   items: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Item",
+      ref: ITEM,
     },
   ],
   createdAt: {

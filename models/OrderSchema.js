@@ -1,4 +1,13 @@
 const mongoose = require("mongoose");
+const {
+  USER,
+  PRODUCT,
+  ORDER_PENDING,
+  KYC_VERIFIED,
+  ORDER_SHIPPED,
+  ORDER_CANCELLED,
+  ORDER_DELIVERED,
+} = require("../utils/enum");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -10,14 +19,14 @@ const orderSchema = new mongoose.Schema(
 
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: USER,
       required: true,
     },
     products: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
+          ref: PRODUCT,
           required: true,
         },
         quantity: { type: Number, required: true, min: 1 },
@@ -31,8 +40,14 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "kyc_verified", "shipped", "cancelled", "delivered"],
-      default: "pending",
+      enum: [
+        ORDER_PENDING,
+        KYC_VERIFIED,
+        ORDER_SHIPPED,
+        ORDER_CANCELLED,
+        ORDER_DELIVERED,
+      ],
+      default: ORDER_PENDING,
     },
     orderDate: {
       type: Date,
@@ -75,7 +90,6 @@ orderSchema.pre("save", async function (next) {
   }
   next();
 });
-
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { USER, ADMIN, ORDER } = require("../utils/enum");
 
 const userSchema = mongoose.Schema(
   {
@@ -19,10 +20,12 @@ const userSchema = mongoose.Schema(
       unique: true,
       trim: true,
     },
-    orders: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Order"
-    }],
+    orders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: ORDER,
+      },
+    ],
     password: {
       type: String,
       // required: true,
@@ -35,8 +38,8 @@ const userSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["Admin", "User"],
-      default: "User",
+      enum: [ADMIN, USER],
+      default: USER,
       required: true,
     },
     googleId: String,

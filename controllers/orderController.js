@@ -1,4 +1,3 @@
-
 const CartSchema = require("../models/CartSchema");
 const Order = require("../models/OrderSchema");
 const Product = require("../models/Product");
@@ -7,7 +6,7 @@ const Payment = require("../models/PaymentSchema");
 const { default: Pincode } = require("pincode-distance");
 const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
-
+const { PRODUCT, INR, ORDER_CANCELLED } = require("../utils/enum");
 
 exports.createOrder = async (req, res) => {
   try {
@@ -29,11 +28,13 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-
     const products = cartItems.map((item) => ({
       product: item.product._id,
       quantity: item.rentOptions?.quantity || 1,
-      expirationDate: moment().add(item.rentOptions?.rentMonthsCount || 0, "months"),
+      expirationDate: moment().add(
+        item.rentOptions?.rentMonthsCount || 0,
+        "months"
+      ),
     }));
 
     console.log("Products:  mil gya", products);
@@ -59,23 +60,22 @@ exports.createOrder = async (req, res) => {
       shippingAddress: address,
       expectedDelivery,
       orderNumber,
-    })
+    });
 
-    console.log("Order:  mil gya", order);
+    console.log("Order:", order);
 
     user.orders.push(order._id);
     // await user.save();
     // await order.save();
 
-    Promise.all([user.save(), order.save()])
+    Promise.all([user.save(), order.save()]);
 
-    console.log("Order Saved:  mil gya", order);
-
+    console.log("Order Saved:", order);
 
     const paymentEntry = new Payment({
       orderId: order._id,
       amount: parseFloat(cartTotal).toFixed(2),
-      currency: "INR",
+      currency: INR,
       userId,
     });
 
@@ -118,17 +118,17 @@ exports.customerWithOrders = async (req, res) => {
         path: "orders",
         populate: {
           path: "products.product", // Path to the nested field
-          model: "Product", // The model you're referencing
+          model: PRODUCT, // The model you're referencing
         },
       });
     const custWthOrders = customer.filter((cust) => cust.orders.length > 0);
     res.status(200).json({
-      custWthOrders
-    })
+      custWthOrders,
+    });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
-}
+};
 
 exports.getMyOrders = async (req, res) => {
   try {
@@ -199,7 +199,7 @@ exports.cancelOrder = async (req, res) => {
       orderId,
       {
         $set: {
-          status: "cancelled", // Set status to 'cancelled'
+          status: ORDER_CANCELLED, // Set status to 'cancelled'
         },
       },
       { new: true, runValidators: true } // Ensure validators run
@@ -226,7 +226,6 @@ exports.cancelOrder = async (req, res) => {
 };
 
 exports.updateOrder = async (req, res) => {
-
   try {
     const { status, orderDate, endDate } = req.body;
 
@@ -475,16 +474,16 @@ exports.updateCart = async (req, res) => {
 
 exports.updateCartQuantity = async (req, res) => {
   try {
-    const { userCartNewData, userId } = req.body // this will be the array of new cart data
-    
-    const cart = await CartSchema.findOne({ user: userId })
-    cart.items = userCartNewData
-    await cart.save()
-    res.status(200).json({ success: true, data: cart })
+    const { userCartNewData, userId } = req.body; // this will be the array of new cart data
+
+    const cart = await CartSchema.findOne({ user: userId });
+    cart.items = userCartNewData;
+    await cart.save();
+    res.status(200).json({ success: true, data: cart });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
-}
+};
 
 exports.deleteCart = async (req, res) => {
   try {

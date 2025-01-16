@@ -3,6 +3,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const Product = require("../models/Product");
+const { USER } = require("../utils/enum");
 require("dotenv").config();
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -29,7 +30,6 @@ exports.googleOAuth = async (req, res) => {
 
     const paddedNumber = nextNumber.toString().padStart(6, "0");
     const customerId = `CUST${paddedNumber}`;
-
 
     const user = await User.findOneAndUpdate(
       { googleId },
@@ -127,7 +127,7 @@ exports.signup = async (req, res) => {
       email,
       password: hashedPassword,
       mobileNumber: mobileNumber,
-      role: "User",
+      role: USER,
       customerId,
     });
     await user.save();
@@ -201,7 +201,7 @@ exports.userDetails = async (req, res) => {
     });
   }
 
-  const user = await User.findById(id).populate("orders")
+  const user = await User.findById(id).populate("orders");
   if (!user) {
     return res.status(404).json({
       success: false,
@@ -213,7 +213,7 @@ exports.userDetails = async (req, res) => {
     success: true,
     user,
   });
-}
+};
 
 exports.getUserCount = async (req, res) => {
   try {

@@ -1,4 +1,5 @@
 const twilio = require("twilio");
+const { logger } = require('../utils/logger');
 exports.sendWhatsAppOtp = async (req, res, next) => {
   const phone = req.params.id;
 
@@ -28,7 +29,7 @@ exports.sendWhatsAppOtp = async (req, res, next) => {
       sid: verification.sid, // Optional: Provide the verification SID for tracking
     });
   } catch (error) {
-    console.error("Error sending OTP:", error.message);
+    logger.error("Error sending OTP:", error.message);
     return res
       .status(500)
       .json({ message: "Error in Sending OTP", error: error.message });
@@ -53,8 +54,8 @@ exports.verifyWhatsAppOtp = async (req, res) => {
       to: "+91" + phone,
     })
     .then((resp) => {
-      // console.log(otp + " " + phone);
-      // console.log(resp.status);
+      // logger.info(otp + " " + phone);
+      // logger.info(resp.status);
       if (resp.status === "approved") {
         return res
           .status(200)
@@ -69,7 +70,7 @@ exports.verifyWhatsAppOtp = async (req, res) => {
       }
     })
     .catch((e) => {
-      // console.log(e);
+      // logger.info(e);
       return res.status(404).json({ message: "Error in Verifing OTP: " + e });
     });
 };

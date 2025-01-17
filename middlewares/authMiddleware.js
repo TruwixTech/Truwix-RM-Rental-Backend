@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { logger } = require('../utils/logger');
+
 require('dotenv').config();
 
 const authenticate = async (req, res, next) => {
@@ -20,7 +22,7 @@ const authenticate = async (req, res, next) => {
 
         next();
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(401).json({ success: false, message: 'Invalid token' });
     }
 };

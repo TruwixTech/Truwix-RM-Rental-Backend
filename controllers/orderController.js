@@ -1,4 +1,4 @@
-
+const { logger } = require('../utils/logger');
 const CartSchema = require("../models/CartSchema");
 const Order = require("../models/OrderSchema");
 const Product = require("../models/Product");
@@ -36,7 +36,7 @@ exports.createOrder = async (req, res) => {
       expirationDate: moment().add(item.rentOptions?.rentMonthsCount || 0, "months"),
     }));
 
-    console.log("Products:  mil gya", products);
+    logger.info("Products:  mil gya", products);
 
     const expectedDelivery = moment().add(2, "days");
 
@@ -61,7 +61,7 @@ exports.createOrder = async (req, res) => {
       orderNumber,
     })
 
-    console.log("Order:  mil gya", order);
+    logger.info("Order:  mil gya", order);
 
     user.orders.push(order._id);
     // await user.save();
@@ -69,7 +69,7 @@ exports.createOrder = async (req, res) => {
 
     Promise.all([user.save(), order.save()])
 
-    console.log("Order Saved:  mil gya", order);
+    logger.info("Order Saved:  mil gya", order);
 
 
     const paymentEntry = new Payment({
@@ -80,7 +80,7 @@ exports.createOrder = async (req, res) => {
     });
 
     await paymentEntry.save();
-    console.log(order);
+    logger.info(order);
 
     return res.status(201).json({
       success: true,
@@ -90,7 +90,7 @@ exports.createOrder = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error creating order:", error);
+    logger.error("Error creating order:", error);
 
     return res.status(500).json({
       success: false,
@@ -163,7 +163,7 @@ exports.getMyOrderProductNames = async (req, res) => {
     // Return the array of product names
     res.json(productTitles);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -217,7 +217,7 @@ exports.cancelOrder = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error updating order:", error.message);
+    logger.error("Error updating order:", error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -238,8 +238,8 @@ exports.updateOrder = async (req, res) => {
       });
     }
 
-    console.log(orderDate);
-    console.log(endDate);
+    logger.info(orderDate);
+    logger.info(endDate);
 
     // Find the order by ID
     const order = await Order.findById(req.params.id);
@@ -274,7 +274,7 @@ exports.updateOrder = async (req, res) => {
         .json({ success: false, error: "Order not found after update" });
     }
   } catch (error) {
-    console.error("Error updating order:", error.message);
+    logger.error("Error updating order:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -301,7 +301,7 @@ exports.updateOrder2 = async (req, res) => {
       data: order,
     });
   } catch (error) {
-    console.error("Error updating order endDate:", error.message);
+    logger.error("Error updating order endDate:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -310,8 +310,8 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
   try {
     const { orderId, newStatus } = req.body;
 
-    console.log("Order id: ", orderId);
-    console.log("New Status: ", newStatus);
+    logger.info("Order id: ", orderId);
+    logger.info("New Status: ", newStatus);
 
     // Find the order by ID and update its status
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -330,7 +330,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
-    console.error("Error updating order status:", error);
+    logger.error("Error updating order status:", error);
     return res
       .status(500)
       .json({ success: false, message: "Failed to update status" });

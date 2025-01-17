@@ -1,4 +1,12 @@
 const mongoose = require("mongoose");
+const {
+  APPLIANCE,
+  LIVING_ROOM,
+  STORAGE,
+  STUDY_ROOM,
+  BED_ROOM,
+  TABLE,
+} = require("../utils/enum");
 
 const productSchema = new mongoose.Schema(
   {
@@ -16,26 +24,18 @@ const productSchema = new mongoose.Schema(
       type: [String],
       default: [], // Ensures img is always an array
     },
-    size:{
+    size: {
       type: String,
     },
     category: {
       type: String,
-      enum: [
-        "appliance",
-        "livingroom",
-        "storage",
-        "studyroom",
-        "bedroom",
-        "table",
-      ],
+      enum: [APPLIANCE, LIVING_ROOM, STORAGE, STUDY_ROOM, BED_ROOM, TABLE],
       required: [true, "Product category is required"],
       index: true,
     },
-   
+
     details: {
       description: { type: String },
-      
       month: {
         type: [Number],
         default: [],
@@ -60,7 +60,6 @@ const productSchema = new mongoose.Schema(
         default: null, // Default to null if not provided
       },
     },
-    
   },
   { timestamps: true }
 );

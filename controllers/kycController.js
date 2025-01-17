@@ -1,23 +1,25 @@
 const cloudinary = require("cloudinary").v2;
 const KYC = require("../models/kycSchema");
 const User = require("../models/User");
+const { KYC_PENDING, KYC_APPROVED, KYC_REJECTED } = require("../utils/enum");
 
 exports.updateKYCStatus = async (req, res) => {
   const { kycId, newStatus, rejectedReason } = req.body;
 
   // Check if the new status is valid
-  const validStatuses = ["Pending", "Approved", "Rejected"];
+  const validStatuses = [KYC_PENDING, KYC_APPROVED, KYC_REJECTED];
   if (!validStatuses.includes(newStatus)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
+      message:
+        "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
     });
   }
 
   const updateFields = { kycStatus: newStatus };
 
   // Only include rejectReason if the status is 'Rejected'
-  if (newStatus === "Rejected" && rejectedReason) {
+  if (newStatus === KYC_REJECTED && rejectedReason) {
     updateFields.rejectReason = rejectedReason;
   }
 
@@ -44,8 +46,6 @@ exports.updateKYCStatus = async (req, res) => {
     });
   }
 };
-
-
 
 exports.getAllKYC = async (req, res) => {
   try {
@@ -112,7 +112,7 @@ exports.uploadKYC = async (req, res) => {
       const kyc = new KYC({
         userId,
         documents,
-        kycStatus: "Pending",
+        kycStatus: KYC_PENDING,
         alternateNumber, // Store alternate number
         currentAddress, // Store current address
       });

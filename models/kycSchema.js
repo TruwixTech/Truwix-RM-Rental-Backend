@@ -1,10 +1,17 @@
 const mongoose = require("mongoose");
+const {
+  USER,
+  KYC_PENDING,
+  KYC_APPROVED,
+  KYC_REJECTED,
+  NO_SPECIFIED_REASON,
+} = require("../utils/enum");
 
 const kycSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId, // Reference to the user
-      ref: "User",
+      ref: USER,
       required: true,
     },
     documents: [
@@ -14,11 +21,15 @@ const kycSchema = new mongoose.Schema(
         uploadedAt: { type: Date, default: Date.now },
       },
     ],
-    kycStatus: { type: String, default: "Pending" },
+    kycStatus: {
+      type: String,
+      enum: [KYC_PENDING, KYC_APPROVED, KYC_REJECTED],
+      default: KYC_PENDING,
+    },
     alternateNumber: { type: String, required: true }, // Ensure this is required
     currentAddress: { type: String, required: true }, // Ensure this is required
-    rejectReason: { type: String , default: "No Specified Reason"}, // New field for rejection reason
-},
+    rejectReason: { type: String, default: NO_SPECIFIED_REASON }, // New field for rejection reason
+  },
   { timestamps: true }
 );
 

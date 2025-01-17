@@ -5,6 +5,7 @@ const morgan = require("morgan");
 require('dotenv').config();
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./swagger_output.json");
+const { logger } = require('./utils/logger');
 
 const allowedOrigins = [
   "http://localhost:5173", // for development
@@ -57,5 +58,5 @@ app.use("/api/coupon", coupon);
 app.use("/api", order);
 
 app.listen(PORT, () => {
-    console.log(`App listening on port ${PORT}`);
+    logger.info(`App listening on port ${PORT}`);
 });

@@ -1,7 +1,9 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { logger } = require('../utils/logger');
 const { ADMIN } = require("../utils/enum");
-require("dotenv").config();
+require('dotenv').config();
+
 
 const authenticate = async (req, res, next) => {
   try {
@@ -15,18 +17,16 @@ const authenticate = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
 
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "User not found" });
-    }
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(401).json({ success: false, message: 'User not found' });
+        }
 
-    next();
-  } catch (error) {
-    console.error(error);
-    res.status(401).json({ success: false, message: "Invalid token" });
-  }
+        next();
+    } catch (error) {
+        logger.error(error);
+        res.status(401).json({ success: false, message: 'Invalid token' });
+    }
 };
 
 const authorizeAdmin = (req, res, next) => {

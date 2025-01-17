@@ -59,7 +59,7 @@ exports.getAllKYC = async (req, res) => {
       data: kycs,
     });
   } catch (error) {
-    console.error("Error fetching KYCs:", error);
+    logger.error("Error fetching KYCs:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch KYC records.",
@@ -124,7 +124,7 @@ exports.uploadKYC = async (req, res) => {
       message: "KYC documents uploaded successfully.",
     });
   } catch (error) {
-    console.error("Error uploading KYC documents:", error);
+    logger.error("Error uploading KYC documents:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error.",
@@ -152,7 +152,7 @@ exports.getKYCStatus = async (req, res) => {
       rejectReason: kyc.rejectReason, // Include rejectReason in the response
     });
   } catch (error) {
-    console.error("Error fetching KYC status:", error);
+    logger.error("Error fetching KYC status:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error.",

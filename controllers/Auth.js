@@ -5,6 +5,7 @@ const { OAuth2Client } = require("google-auth-library");
 const Product = require("../models/Product");
 require("dotenv").config();
 const { logger } = require('../utils/logger');
+var validator = require("email-validator");
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const gpiclient = new OAuth2Client(googleClientId);
@@ -108,6 +109,14 @@ exports.signup = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });
+    }
+
+    // validate email
+    if(!validator.validate(email))
+    {
+      return res
+      .status(400)
+      .json({ success: false, message: "Invalid email" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

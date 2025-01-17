@@ -1,8 +1,6 @@
-
-
 const Product = require('../models/Product');
 const User = require('../models/User');
-
+const { logger } = require('../utils/logger');
 
 exports.addReview = async (req, res) => {
     try {
@@ -26,7 +24,7 @@ exports.addReview = async (req, res) => {
 
         res.status(200).json({ success: true, data: product });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ success: false, message: 'Failed to add review' });
     }
 };
@@ -44,7 +42,7 @@ exports.getReviews = async (req, res) => {
 
         res.status(200).json({ success: true, data: product.reviews });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ success: false, message: 'Failed to get reviews' });
     }
 };

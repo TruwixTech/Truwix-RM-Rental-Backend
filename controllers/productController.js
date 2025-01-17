@@ -1,5 +1,6 @@
 const { log } = require("console");
 const Product = require("../models/Product");
+const { logger } = require('../utils/logger');
 const path = require("path");
 const CartSchema = require("../models/CartSchema");
 const AddOn = require("../models/AddOnSchema");
@@ -85,7 +86,7 @@ exports.createProduct = async (req, res) => {
       product,
     });
   } catch (error) {
-    console.error("Error creating product:", error);
+    logger.error("Error creating product:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -147,7 +148,7 @@ exports.updateProduct = async (req, res) => {
       ? parsedDetails.month
       : [];
 
-    console.log(img);
+    logger.info(img);
 
     // Initialize img with existing images from request
     let newImg = Array.isArray(img) ? img : [img]; // Ensure img is an array
@@ -170,7 +171,7 @@ exports.updateProduct = async (req, res) => {
         ? JSON.parse(rentalOptions)
         : rentalOptions;
 
-    console.log(newImg);
+    logger.info(newImg);
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -196,7 +197,7 @@ exports.updateProduct = async (req, res) => {
 
     res.status(200).json({ success: true, data: product });
   } catch (error) {
-    console.error("Error updating product:", error);
+    logger.error("Error updating product:", error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -255,7 +256,7 @@ exports.getProductCount = async (req, res) => {
 exports.searchProducts = async (req, res) => {
   try {
     const query = req.query.query;
-    console.log("query", req.query);
+    logger.info("query", req.query);
 
     if (!query) {
       return res.status(400).json({ message: 'Query parameter is required' });
@@ -272,7 +273,7 @@ exports.searchProducts = async (req, res) => {
       title: product.title
     })));
   } catch (error) {
-    console.error("Error searching products:", error);
+    logger.error("Error searching products:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };

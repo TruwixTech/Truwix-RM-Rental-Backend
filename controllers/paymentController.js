@@ -1,4 +1,5 @@
 const { RAZOR_PAY } = require("../service/payment");
+const { logger } = require('../utils/logger');
 
 const createOrder = async (req, res) => {
   const { amount, currency, receipt } = req.body;
@@ -13,6 +14,7 @@ const createOrder = async (req, res) => {
     const order = await RAZOR_PAY.orders.create(options);
     res.json(order);
   } catch (error) {
+    logger.error(error);
     res.status(500).send(error);
   }
 };

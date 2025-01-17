@@ -92,7 +92,7 @@ exports.forgotPassword = async (req, res) => {
       message: "Password reset successful",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Something went wrong, please try again",
@@ -147,7 +147,7 @@ exports.signup = async (req, res) => {
       message: "User created successfully",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "User cannot be registered, please try again",
@@ -194,7 +194,7 @@ exports.login = async (req, res) => {
       res.status(401).json({ success: false, message: "Invalid password" });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res
       .status(500)
       .json({ success: false, message: "Login failure. Please try again" });

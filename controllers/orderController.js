@@ -1,4 +1,4 @@
-
+const { logger } = require('../utils/logger');
 const CartSchema = require("../models/CartSchema");
 const Order = require("../models/OrderSchema");
 const Product = require("../models/Product");
@@ -7,7 +7,7 @@ const Payment = require("../models/PaymentSchema");
 const { default: Pincode } = require("pincode-distance");
 const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
-
+const { PRODUCT, INR, ORDER_CANCELLED } = require("../utils/enum");
 
 exports.createOrder = async (req, res) => {
   try {
@@ -29,14 +29,16 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-
     const products = cartItems.map((item) => ({
       product: item.product._id,
       quantity: item.rentOptions?.quantity || 1,
-      expirationDate: moment().add(item.rentOptions?.rentMonthsCount || 0, "months"),
+      expirationDate: moment().add(
+        item.rentOptions?.rentMonthsCount || 0,
+        "months"
+      ),
     }));
 
-    console.log("Products:  mil gya", products);
+    logger.info("Products:  mil gya", products);
 
     const expectedDelivery = moment().add(2, "days");
 
@@ -59,9 +61,9 @@ exports.createOrder = async (req, res) => {
       shippingAddress: address,
       expectedDelivery,
       orderNumber,
-    })
+    });
 
-    console.log("Order:  mil gya", order);
+    logger.info("Order:", order);
 
     user.orders.push(order._id);
     // await user.save();
@@ -69,18 +71,18 @@ exports.createOrder = async (req, res) => {
 
     Promise.all([user.save(), order.save()])
 
-    console.log("Order Saved:  mil gya", order);
+    logger.info("Order Saved:", order);
 
 
     const paymentEntry = new Payment({
       orderId: order._id,
       amount: parseFloat(cartTotal).toFixed(2),
-      currency: "INR",
+      currency: INR,
       userId,
     });
 
     await paymentEntry.save();
-    console.log(order);
+    logger.info(order);
 
     return res.status(201).json({
       success: true,
@@ -90,7 +92,7 @@ exports.createOrder = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error creating order:", error);
+    logger.error("Error creating order:", error);
 
     return res.status(500).json({
       success: false,
@@ -118,17 +120,17 @@ exports.customerWithOrders = async (req, res) => {
         path: "orders",
         populate: {
           path: "products.product", // Path to the nested field
-          model: "Product", // The model you're referencing
+          model: PRODUCT, // The model you're referencing
         },
       });
     const custWthOrders = customer.filter((cust) => cust.orders.length > 0);
     res.status(200).json({
-      custWthOrders
-    })
+      custWthOrders,
+    });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
-}
+};
 
 exports.getMyOrders = async (req, res) => {
   try {
@@ -163,7 +165,7 @@ exports.getMyOrderProductNames = async (req, res) => {
     // Return the array of product names
     res.json(productTitles);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -199,7 +201,7 @@ exports.cancelOrder = async (req, res) => {
       orderId,
       {
         $set: {
-          status: "cancelled", // Set status to 'cancelled'
+          status: ORDER_CANCELLED, // Set status to 'cancelled'
         },
       },
       { new: true, runValidators: true } // Ensure validators run
@@ -217,7 +219,7 @@ exports.cancelOrder = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error updating order:", error.message);
+    logger.error("Error updating order:", error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -226,7 +228,6 @@ exports.cancelOrder = async (req, res) => {
 };
 
 exports.updateOrder = async (req, res) => {
-
   try {
     const { status, orderDate, endDate } = req.body;
 
@@ -238,8 +239,8 @@ exports.updateOrder = async (req, res) => {
       });
     }
 
-    console.log(orderDate);
-    console.log(endDate);
+    logger.info(orderDate);
+    logger.info(endDate);
 
     // Find the order by ID
     const order = await Order.findById(req.params.id);
@@ -274,7 +275,7 @@ exports.updateOrder = async (req, res) => {
         .json({ success: false, error: "Order not found after update" });
     }
   } catch (error) {
-    console.error("Error updating order:", error.message);
+    logger.error("Error updating order:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -301,7 +302,7 @@ exports.updateOrder2 = async (req, res) => {
       data: order,
     });
   } catch (error) {
-    console.error("Error updating order endDate:", error.message);
+    logger.error("Error updating order endDate:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -310,8 +311,8 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
   try {
     const { orderId, newStatus } = req.body;
 
-    console.log("Order id: ", orderId);
-    console.log("New Status: ", newStatus);
+    logger.info("Order id: ", orderId);
+    logger.info("New Status: ", newStatus);
 
     // Find the order by ID and update its status
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -330,7 +331,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
-    console.error("Error updating order status:", error);
+    logger.error("Error updating order status:", error);
     return res
       .status(500)
       .json({ success: false, message: "Failed to update status" });
@@ -475,16 +476,16 @@ exports.updateCart = async (req, res) => {
 
 exports.updateCartQuantity = async (req, res) => {
   try {
-    const { userCartNewData, userId } = req.body // this will be the array of new cart data
-    
-    const cart = await CartSchema.findOne({ user: userId })
-    cart.items = userCartNewData
-    await cart.save()
-    res.status(200).json({ success: true, data: cart })
+    const { userCartNewData, userId } = req.body; // this will be the array of new cart data
+
+    const cart = await CartSchema.findOne({ user: userId });
+    cart.items = userCartNewData;
+    await cart.save();
+    res.status(200).json({ success: true, data: cart });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
-}
+};
 
 exports.deleteCart = async (req, res) => {
   try {

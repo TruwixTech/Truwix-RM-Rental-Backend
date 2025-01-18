@@ -3,7 +3,10 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const Product = require("../models/Product");
+const { USER } = require("../utils/enum");
 require("dotenv").config();
+const { logger } = require('../utils/logger');
+var validator = require("email-validator");
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const gpiclient = new OAuth2Client(googleClientId);
@@ -29,7 +32,6 @@ exports.googleOAuth = async (req, res) => {
 
     const paddedNumber = nextNumber.toString().padStart(6, "0");
     const customerId = `CUST${paddedNumber}`;
-
 
     const user = await User.findOneAndUpdate(
       { googleId },
@@ -90,7 +92,7 @@ exports.forgotPassword = async (req, res) => {
       message: "Password reset successful",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Something went wrong, please try again",
@@ -107,6 +109,14 @@ exports.signup = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });
+    }
+
+    // validate email
+    if(!validator.validate(email))
+    {
+      return res
+      .status(400)
+      .json({ success: false, message: "Invalid email" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -127,7 +137,7 @@ exports.signup = async (req, res) => {
       email,
       password: hashedPassword,
       mobileNumber: mobileNumber,
-      role: "User",
+      role: USER,
       customerId,
     });
     await user.save();
@@ -137,7 +147,7 @@ exports.signup = async (req, res) => {
       message: "User created successfully",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "User cannot be registered, please try again",
@@ -184,7 +194,7 @@ exports.login = async (req, res) => {
       res.status(401).json({ success: false, message: "Invalid password" });
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res
       .status(500)
       .json({ success: false, message: "Login failure. Please try again" });
@@ -201,7 +211,7 @@ exports.userDetails = async (req, res) => {
     });
   }
 
-  const user = await User.findById(id).populate("orders")
+  const user = await User.findById(id).populate("orders");
   if (!user) {
     return res.status(404).json({
       success: false,
@@ -213,7 +223,7 @@ exports.userDetails = async (req, res) => {
     success: true,
     user,
   });
-}
+};
 
 exports.getUserCount = async (req, res) => {
   try {

@@ -1,17 +1,18 @@
 const mongoose = require("mongoose");
+const { USER, PRODUCT } = require("../utils/enum");
 
 const cartSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: USER,
       required: true,
     },
     items: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
+          ref: PRODUCT,
           required: true,
         },
         rentOptions: {

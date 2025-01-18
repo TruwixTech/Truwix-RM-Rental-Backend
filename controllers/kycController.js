@@ -1,23 +1,25 @@
 const cloudinary = require("cloudinary").v2;
 const KYC = require("../models/kycSchema");
 const User = require("../models/User");
+const { KYC_PENDING, KYC_APPROVED, KYC_REJECTED } = require("../utils/enum");
 
 exports.updateKYCStatus = async (req, res) => {
   const { kycId, newStatus, rejectedReason } = req.body;
 
   // Check if the new status is valid
-  const validStatuses = ["Pending", "Approved", "Rejected"];
+  const validStatuses = [KYC_PENDING, KYC_APPROVED, KYC_REJECTED];
   if (!validStatuses.includes(newStatus)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
+      message:
+        "Invalid KYC status. It must be either 'Pending', 'Approved', or 'Rejected'.",
     });
   }
 
   const updateFields = { kycStatus: newStatus };
 
   // Only include rejectReason if the status is 'Rejected'
-  if (newStatus === "Rejected" && rejectedReason) {
+  if (newStatus === KYC_REJECTED && rejectedReason) {
     updateFields.rejectReason = rejectedReason;
   }
 
@@ -45,8 +47,6 @@ exports.updateKYCStatus = async (req, res) => {
   }
 };
 
-
-
 exports.getAllKYC = async (req, res) => {
   try {
     const kycs = await KYC.find()
@@ -59,7 +59,7 @@ exports.getAllKYC = async (req, res) => {
       data: kycs,
     });
   } catch (error) {
-    console.error("Error fetching KYCs:", error);
+    logger.error("Error fetching KYCs:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch KYC records.",
@@ -112,7 +112,7 @@ exports.uploadKYC = async (req, res) => {
       const kyc = new KYC({
         userId,
         documents,
-        kycStatus: "Pending",
+        kycStatus: KYC_PENDING,
         alternateNumber, // Store alternate number
         currentAddress, // Store current address
       });
@@ -124,7 +124,7 @@ exports.uploadKYC = async (req, res) => {
       message: "KYC documents uploaded successfully.",
     });
   } catch (error) {
-    console.error("Error uploading KYC documents:", error);
+    logger.error("Error uploading KYC documents:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error.",
@@ -152,7 +152,7 @@ exports.getKYCStatus = async (req, res) => {
       rejectReason: kyc.rejectReason, // Include rejectReason in the response
     });
   } catch (error) {
-    console.error("Error fetching KYC status:", error);
+    logger.error("Error fetching KYC status:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error.",

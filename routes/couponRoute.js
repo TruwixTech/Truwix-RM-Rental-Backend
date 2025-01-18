@@ -2,6 +2,7 @@ const Coupon = require('../models/Coupon');
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { logger } = require('../utils/logger');
 
 router.post('/create-coupon', async (req, res) => {
     const { code, discountPercentage, expiryDate } = req.body;
@@ -20,7 +21,7 @@ router.post('/create-coupon', async (req, res) => {
             expiryDate,
         });
 
-        console.log(newCoupon);
+        logger.info(newCoupon);
 
         await newCoupon.save();
         res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
@@ -62,7 +63,7 @@ router.post("/validate", async (req, res) => {
             discountPercentage: coupon.discountPercentage,
         });
     } catch (error) {
-        console.error("Error validating coupon:", error);
+        logger.error(error);
         return res.status(500).json({ valid: false, error: "Internal server error." });
     }
 });

@@ -43,22 +43,13 @@ const productSchema = new mongoose.Schema(
       },
     },
     rentalOptions: {
-      rent3Months: {
-        type: String,
-        default: null, // Default to null if not provided
-      },
-      rent6Months: {
-        type: String,
-        default: null, // Default to null if not provided
-      },
-      rent9Months: {
-        type: String,
-        default: null, // Default to null if not provided
-      },
-      rent12Months: {
-        type: String,
-        default: null, // Default to null if not provided
-      },
+      type: Map,
+      of: String, // Keys will be the month numbers, values will be the rental price
+      default: {},
+    },
+    quantity: {
+      type: Number,
+      required: [true, "quantity is Required"],
     },
   },
   { timestamps: true }

@@ -1,6 +1,6 @@
 const { log } = require("console");
 const Product = require("../models/Product");
-const { logger } = require('../utils/logger');
+const { logger } = require("../utils/logger");
 const path = require("path");
 const CartSchema = require("../models/CartSchema");
 const AddOn = require("../models/AddOnSchema");
@@ -87,6 +87,83 @@ exports.createProduct = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error creating product:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+};
+
+exports.createProductV2 = async (req, res) => {
+  try {
+    const {
+      title,
+      sub_title,
+      category,
+      img = [],
+      description,
+      month = [],
+      rentalOptions = {},
+      quantity,
+    } = req.body;
+
+    let productImages = img;
+
+    // Handle file uploads if files are present
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "productImages",
+          transformation: [{ width: 500, height: 500, crop: "limit" }],
+        });
+        productImages.push(result.secure_url);
+      }
+    }
+
+    // Check for required fields
+    if (!title || !category || !month.length || !img || !quantity) {
+      return res.status(400).json({
+        success: false,
+        error: "All Fields Are Necessary",
+      });
+    }
+
+    // Validate rental options
+    const rentalOptionsMap = {};
+    for (const [key, value] of Object.entries(rentalOptions)) {
+      const monthNumber = parseInt(key, 10);
+      if (isNaN(monthNumber) || monthNumber <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid month value in rental options: ${key}`,
+        });
+      }
+      rentalOptionsMap[monthNumber] = value;
+    }
+
+    // Create the product
+    const product = new Product({
+      title,
+      sub_title,
+      img: productImages,
+      category,
+      details: {
+        description: description,
+        month: month,
+      },
+      rentalOptions: rentalOptionsMap,
+      quantity,
+    });
+
+    // Save the product to the database
+    await product.save();
+
+    return res.status(201).json({
+      success: true,
+      product,
+    });
+  } catch (error) {
+    logger.log("Error creating product:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -259,22 +336,24 @@ exports.searchProducts = async (req, res) => {
     logger.info("query", req.query);
 
     if (!query) {
-      return res.status(400).json({ message: 'Query parameter is required' });
+      return res.status(400).json({ message: "Query parameter is required" });
     }
 
     // Search products whose title contains the query (case-insensitive)
     const products = await Product.find({
-      title: { $regex: query, $options: 'i' },
-    }).select('title _id'); // Return both the title and id
+      title: { $regex: query, $options: "i" },
+    }).select("title _id"); // Return both the title and id
 
     // Send an array of products containing both id and title
-    res.json(products.map((product) => ({
-      id: product._id,
-      title: product.title
-    })));
+    res.json(
+      products.map((product) => ({
+        id: product._id,
+        title: product.title,
+      }))
+    );
   } catch (error) {
     logger.error("Error searching products:", error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 

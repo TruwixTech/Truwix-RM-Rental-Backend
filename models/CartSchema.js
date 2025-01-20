@@ -18,7 +18,6 @@ const cartSchema = new mongoose.Schema(
         rentOptions: {
           rentMonthsCount: {
             type: Number,
-            enum: [3, 6, 9, 12], // Valid months for renting
             required: true,
           },
           quantity: {

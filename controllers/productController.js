@@ -180,28 +180,20 @@ exports.getProducts = async (req, res) => {
       query.category = category;
     }
 
-    let products = await Product.find(query);
-
-    const addOns = await AddOn.find({
+    var products = await Product.find(query);
+    var addOns = await AddOn.find({
       product: { $in: products.map((p) => p._id) },
     });
-
     products = products.map((p) => {
       p = p.toObject();
-      if (p.rentalOptions instanceof Map) {
-        p.rentalOptions = Object.fromEntries(p.rentalOptions);
-      }
       p.addOns = addOns.filter((a) => a.product.equals(p._id));
       return p;
     });
-    
     res.status(200).json({ success: true, data: products });
   } catch (error) {
-    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
-
 
 exports.getProductById = async (req, res) => {
   try {

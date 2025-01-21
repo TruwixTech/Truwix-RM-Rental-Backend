@@ -79,6 +79,7 @@ exports.createProduct = async (req, res) => {
     });
 
     // Save the product to the database
+    logger.info("Attempting to save product:", product);
     await product.save();
 
     return res.status(201).json({
@@ -89,7 +90,7 @@ exports.createProduct = async (req, res) => {
     logger.error("Error creating product:", error);
     return res.status(500).json({
       success: false,
-      error: "Internal server error",
+      error: error.message || "Internal server error",
     });
   }
 };
@@ -114,6 +115,7 @@ exports.getProducts = async (req, res) => {
     });
     res.status(200).json({ success: true, data: products });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -126,10 +128,11 @@ exports.getProductById = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, error: "Product not found" });
-    }
+    } 
 
     res.status(200).json({ success: true, data: product });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -214,9 +217,11 @@ exports.deleteProduct = async (req, res) => {
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
+    logger.error("Error deleting product:", error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
+
 exports.addAddOns = async (req, res) => {
   try {
     const { product, name, price, description } = req.body;
@@ -229,14 +234,17 @@ exports.addAddOns = async (req, res) => {
     await addOn.save();
     res.status(200).json({ success: true, data: cart });
   } catch (error) {
+    logger.error("Error adding add-ons:", error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
+
 exports.getProductCount = async (req, res) => {
   try {
     const count = await Product.countDocuments();
     res.status(200).json({ count });
   } catch (error) {
+    logger.error("Error getting product count:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -293,6 +301,7 @@ exports.deleteProduct = async (req, res) => {
       product: deletedProduct,
     });
   } catch (error) {
+    logger.error("Error deleting product:", error);
     res
       .status(500)
       .send({ message: "Error deleting product", error: error.message });

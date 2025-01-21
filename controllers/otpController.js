@@ -70,7 +70,7 @@ exports.verifyWhatsAppOtp = async (req, res) => {
       }
     })
     .catch((e) => {
-      // logger.info(e);
+      logger.error(error);
       return res.status(404).json({ message: "Error in Verifing OTP: " + e });
     });
 };

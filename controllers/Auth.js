@@ -63,6 +63,7 @@ exports.googleOAuth = async (req, res) => {
       },
     });
   } catch (error) {
+    logger.error(error);
     res.status(401).json({ error: "Google authentication failed" });
   }
 };
@@ -230,6 +231,7 @@ exports.getUserCount = async (req, res) => {
     const count = await User.countDocuments();
     res.status(200).json({ count });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -270,6 +272,7 @@ exports.addAddress = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Address added successfully" });
   } catch (error) {
+    logger.error(error);
     res.json({ success: false, error: error.message });
   }
 };
@@ -284,6 +287,7 @@ exports.deleteAddress = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Address deleted successfully" });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -299,6 +303,7 @@ exports.updateAddress = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Address updated successfully" });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -308,6 +313,7 @@ exports.getAddress = async (req, res) => {
     const user = await User.findById(req.user.id);
     res.status(200).json({ address: user.address });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

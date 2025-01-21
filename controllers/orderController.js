@@ -20,9 +20,10 @@ exports.createOrder = async (req, res) => {
         error: "Unauthorized access. Please log in.",
       });
     }
-
+    logger.info("User not found");
     const user = await User.findById(userId);
     if (!user) {
+      
       return res.status(404).json({
         success: false,
         error: "User not found.",
@@ -93,7 +94,6 @@ exports.createOrder = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error creating order:", error);
-
     return res.status(500).json({
       success: false,
       error: error.message || "An error occurred while creating the order.",
@@ -108,6 +108,7 @@ exports.getOrders = async (req, res) => {
       .populate("products.product");
     res.status(200).json({ success: true, data: orders });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -128,19 +129,22 @@ exports.customerWithOrders = async (req, res) => {
       custWthOrders,
     });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
 
 exports.getMyOrders = async (req, res) => {
   try {
+    console.log("Entered : ");
     const { id } = req.params; // Get the user id from the request parameters
     const orders = await Order.find({ user: id }) // Filter orders by user ID
       .populate("user")
       .populate("products.product");
-
+    console.log(orders);
     res.status(200).json({ success: true, data: orders });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -180,6 +184,7 @@ exports.getOrderById = async (req, res) => {
     }
     res.status(200).json({ success: true, data: order });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -239,9 +244,6 @@ exports.updateOrder = async (req, res) => {
       });
     }
 
-    logger.info(orderDate);
-    logger.info(endDate);
-
     // Find the order by ID
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -262,7 +264,7 @@ exports.updateOrder = async (req, res) => {
     )
       .populate("user")
       .populate("products.product");
-
+      console.log(updatedOrder);
     // Return the updated order data
     if (updatedOrder) {
       return res.status(200).json({
@@ -348,6 +350,7 @@ exports.deleteOrder = async (req, res) => {
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -416,6 +419,7 @@ exports.addToCart = async (req, res) => {
     }
   } catch (error) {
     // Log error for debugging
+    logger.error(error);
     return res.status(500).json({
       success: false,
       error: error.message,
@@ -430,6 +434,7 @@ exports.getCart = async (req, res) => {
     );
     res.status(200).json({ success: true, data: cart });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -470,6 +475,7 @@ exports.updateCart = async (req, res) => {
     await cart.save();
     res.status(200).json({ success: true, data: cart });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -483,6 +489,7 @@ exports.updateCartQuantity = async (req, res) => {
     await cart.save();
     res.status(200).json({ success: true, data: cart });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -492,6 +499,7 @@ exports.deleteCart = async (req, res) => {
     const cart = await CartSchema.findOneAndDelete({ user: req.params.userId });
     res.status(200).json({ success: true, data: cart });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -521,6 +529,7 @@ exports.removeItemFromCart = async (req, res) => {
       data: cart,
     });
   } catch (error) {
+    logger.error(error);
     res.send({
       success: false,
       error: error.message,
@@ -558,6 +567,7 @@ exports.addToWishlist = async (req, res) => {
       return res.send({ success: true, data: wishlist });
     }
   } catch (error) {
+    logger.error(error);
     res.send({ success: false, error: error.message });
   }
 };
@@ -569,6 +579,7 @@ exports.getWishlist = async (req, res) => {
 
     res.status(200).json({ success: true, data: wishlist });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -592,6 +603,7 @@ exports.removeFromWishlist = async (req, res) => {
       wishlist.products.splice(itemIndex, 1);
     }
   } catch (error) {
+    logger.error(error);
     res.send({
       success: false,
       error: error.message,
@@ -606,6 +618,7 @@ exports.deleteWishlist = async (req, res) => {
     });
     res.status(200).json({ success: true, data: wishlist });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -632,6 +645,7 @@ exports.updateWishlist = async (req, res) => {
 
     res.status(200).json({ success: true, data: wishlist });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -644,6 +658,7 @@ exports.verifyPayment = async (req, res) => {
     await CartSchema.findOneAndDelete({ user: userId });
     res.status(200).json({ success: true, data: payment });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
@@ -696,6 +711,7 @@ exports.getTotalCost = async (req, res) => {
     };
     res.status(200).json({ success: true, data: totalCost });
   } catch (error) {
+    logger.error(error);
     res.status(400).json({ success: false, error: error.message });
   }
 };

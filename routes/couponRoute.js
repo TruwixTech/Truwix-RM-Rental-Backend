@@ -26,6 +26,7 @@ router.post('/create-coupon', async (req, res) => {
         await newCoupon.save();
         res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
     } catch (error) {
+        logger.error("Error Creating Coupon",error);
         res.status(500).json({ message: 'Error creating coupon', error });
     }
 });
@@ -36,6 +37,7 @@ router.get('/get-coupons', async (req, res) => {
         const coupons = await Coupon.find();
         res.json({ coupons });
     } catch (error) {
+        logger.error("Error Fetching Coupons",error);
         res.status(500).json({ message: 'Error fetching coupons', error });
     }
 });
@@ -63,7 +65,7 @@ router.post("/validate", async (req, res) => {
             discountPercentage: coupon.discountPercentage,
         });
     } catch (error) {
-        logger.error(error);
+        logger.error("Validation Internal Server Error",error);
         return res.status(500).json({ valid: false, error: "Internal server error." });
     }
 });

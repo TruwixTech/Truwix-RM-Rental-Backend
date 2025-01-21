@@ -39,6 +39,7 @@ exports.updateKYCStatus = async (req, res) => {
       data: kyc,
     });
   } catch (error) {
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "An error occurred while updating the KYC status.",

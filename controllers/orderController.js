@@ -7,7 +7,7 @@ const Payment = require("../models/PaymentSchema");
 const { default: Pincode } = require("pincode-distance");
 const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
-const { PRODUCT, INR, ORDER_CANCELLED } = require("../utils/enum");
+const { PRODUCT, INR, ORDER_CANCELLED, PAYMENT_COMPLETED } = require("../utils/enum");
 
 exports.createOrder = async (req, res) => {
   try {
@@ -76,6 +76,7 @@ exports.createOrder = async (req, res) => {
 
     const paymentEntry = new Payment({
       orderId: order._id,
+      status: PAYMENT_COMPLETED,
       amount: parseFloat(cartTotal).toFixed(2),
       currency: INR,
       userId,

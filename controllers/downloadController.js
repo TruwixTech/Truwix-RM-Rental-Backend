@@ -1,39 +1,36 @@
-const fs = require('fs').promises;
-const path = require('path');
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const logger = require('pino');  // Make sure to replace this with your actual logger
 
 exports.download = async (req, res) => {
+    const { id } = req.params; // Ensure that you're passing an actual ObjectId
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid product ID',
+        });
+    }
+
     try {
-        const { url } = req.body; // Assuming the URL is sent in the request body
-
-        if (!url) {
-            throw new Error('URL is required');
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: 'Product not found',
+            });
         }
-
-        // Download the file
-        const response = await axios.get(url, { responseType: 'stream' });
-        const fileStream = response.data;
-
-        // Get the filename from the URL (you might want to implement this logic)
-        let fileName = path.basename(url);
-
-        // Save the file
-        const filePath = path.join(__dirname, '..', 'downloads', fileName);
-        await fs.mkdir(path.dirname(filePath), { recursive: true });
-        await fs.writeFile(filePath, fileStream);
 
         res.status(200).json({
             success: true,
-            message: `File downloaded successfully: ${fileName}`,
-            downloadUrl: `/download/${fileName}`
+            product,
         });
-
     } catch (error) {
-        logger.error(error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to download',
-            error: error.message
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving product',
+            error: error.message,
         });
     }
 };

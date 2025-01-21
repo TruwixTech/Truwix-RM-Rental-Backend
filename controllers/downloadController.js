@@ -3,34 +3,22 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('pino');  // Make sure to replace this with your actual logger
 
-exports.download = async (req, res) => {
-    const { id } = req.params; // Ensure that you're passing an actual ObjectId
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid product ID',
-        });
-    }
-
+exports.getProducts = async (req, res) => {
     try {
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: 'Product not found',
-            });
-        }
+        const response = await axios({
+            req,
+            method: 'GET',
+            responseType: 'stream' 
+        });
 
-        res.status(200).json({
-            success: true,
-            product,
+        const writer = fs.createWriteStream(res);
+        response.data.pipe(writer);
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error retrieving product',
-            error: error.message,
-        });
+        console.error('Error downloading the image:', error);
     }
 };

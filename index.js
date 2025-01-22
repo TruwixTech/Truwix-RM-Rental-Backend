@@ -6,6 +6,8 @@ require('dotenv').config();
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./swagger_output.json");
 const { logger } = require('./utils/logger');
+const bodyParser = require('body-parser');
+
 
 const allowedOrigins = [
   "http://localhost:5173", // for development
@@ -24,22 +26,38 @@ const allowedOrigins = [
   "https://truwix-rm-rental-backend-dev.vercel.app/api"
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg =
-          "The CORS policy for this site does not allow access from the specified origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         const msg =
+//           "The CORS policy for this site does not allow access from the specified origin.";
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     },
+//     credentials: true,
+//   })
+// );
 
-app.options("*", cors());
+// app.options("*", cors());
+
+const corsOptions = {
+  origin: function(origin, callback){
+      if(!origin || allowedOrigins.indexOf(origin) !== -1){
+          callback(null, true); // Allow the origin
+      }else{
+          callback(new Error('Origin not allowed by Cors'));
+      }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}
+
+app.use(bodyParser.json());
+app.use(cors(corsOptions));
 
 const PORT = process.env.PORT || 4000;
 

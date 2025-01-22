@@ -12,10 +12,7 @@
       "src": "/(.*)",
       "dest": "index.js"
    }
-   ],
-   "env": {
-      "SKIP_DEPLOYMENT": "true"
-    }
+   ]
 }
 
    

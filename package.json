@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node swagger.js&&node index.js",
+    "start": "node swagger.js && nodemon index.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],
@@ -31,6 +31,7 @@
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^6.9.15",
+    "pdfkit": "^0.16.0",
     "pincode-distance": "^1.0.2",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
@@ -41,6 +42,7 @@
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.3.2",
+    "uuid": "^11.0.5",
     "validator": "^13.12.0"
   },
   "devDependencies": {

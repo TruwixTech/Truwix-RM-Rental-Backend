@@ -22,6 +22,8 @@ const STORAGE = "storage";
 const STUDY_ROOM = "studyroom";
 const BED_ROOM = "bedroom";
 const TABLE = "table";
+const PAID = "Paid";
+const UNPAID = "Unpaid";
 module.exports = {
   USER,
   ADMIN,
@@ -47,4 +49,6 @@ module.exports = {
   STUDY_ROOM,
   BED_ROOM,
   TABLE,
+  PAID,
+  UNPAID,
 };

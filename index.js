@@ -11,17 +11,17 @@ const allowedOrigins = [
   "http://localhost:5173", // for development
   "http://localhost:4000",
   "https://rmrental-backend.vercel.app",
-  "https://rmrental-project.vercel.app/",
+  "https://rmrental-project.vercel.app",
   // "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app",
   // "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app/",
   // "https://rmrental-project-git-main-aftab1311s-projects.vercel.app",
   // "https://rmrental-project-git-main-aftab1311s-projects.vercel.app/",
   // "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app",
   // "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app/",
-  "https://truwix-rm-rental-backend-dev.vercel.app/",
+  "https://truwix-rm-rental-backend-dev.vercel.app",
   "https://rmfurniturerental.in",
-  "https://rm-rental-frontend-dev.vercel.app/",
-  "https://truwix-rm-rental-backend-dev.vercel.app/api/"
+  "https://rm-rental-frontend-dev.vercel.app",
+  "https://truwix-rm-rental-backend-dev.vercel.app/api"
 ];
 
 app.use(

@@ -21,6 +21,7 @@ const allowedOrigins = [
   "https://truwix-rm-rental-backend-dev.vercel.app/",
   "https://rmfurniturerental.in",
   "https://rm-rental-frontend-dev.vercel.app/",
+  "https://truwix-rm-rental-backend-dev.vercel.app/api/"
 ];
 
 app.use(

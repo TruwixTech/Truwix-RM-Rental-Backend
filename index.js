@@ -9,15 +9,16 @@ const { logger } = require('./utils/logger');
 
 const allowedOrigins = [
   "http://localhost:5173", // for development
-  "https://rmrental-backend.vercel.app",
-  "https://rmrental-project.vercel.app/",
-  "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app",
-  "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app/",
-  "https://rmrental-project-git-main-aftab1311s-projects.vercel.app",
-  "https://rmrental-project-git-main-aftab1311s-projects.vercel.app/",
-  "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app",
-  "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app/",
-  "https://rmfurniturerental.in" // for production
+  // "https://rmrental-backend.vercel.app",
+  // "https://rmrental-project.vercel.app/",
+  // "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app",
+  // "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app/",
+  // "https://rmrental-project-git-main-aftab1311s-projects.vercel.app",
+  // "https://rmrental-project-git-main-aftab1311s-projects.vercel.app/",
+  // "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app",
+  // "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app/",
+   "https://rmfurniturerental.in",
+   "https://rm-rental-frontend-dev.vercel.app/",
 ];
 
 app.use(

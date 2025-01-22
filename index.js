@@ -6,7 +6,6 @@ require('dotenv').config();
 const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./swagger_output.json");
 const { logger } = require('./utils/logger');
-const bodyParser = require('body-parser');
 
 
 const allowedOrigins = [
@@ -56,7 +55,6 @@ const corsOptions = {
   credentials: true,
 }
 
-app.use(bodyParser.json());
 app.use(cors(corsOptions));
 
 const PORT = process.env.PORT || 4000;

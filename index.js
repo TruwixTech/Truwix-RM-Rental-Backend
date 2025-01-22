@@ -53,11 +53,9 @@ app.use("/api/products", product);
 
 const order = require("./routes/orderRoute");
 const coupon = require("./routes/couponRoute");
-const invoice = require("./routes/invoiceRoute");
 
 app.use("/api/coupon", coupon);
 app.use("/api", order);
-app.use("/api/invoice", invoice);
 
 app.listen(PORT, () => {
     logger.info(`App listening on port ${PORT}`);

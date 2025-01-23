@@ -287,6 +287,106 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+exports.resetProductQuantity = async (req, res) => {
+  try
+  {
+    const {id} = req.params;
+    let quantity = 0;
+    
+    if(!id || typeof id !== "string")
+    {
+      return res.status(400).json({ success: false, error: "Invalid ID provided" });
+    }
+    
+    const product = await Product.findByIdAndUpdate(
+      id,
+        {quantity},
+        {new:true}
+    );
+    
+    if(!product)
+    {
+      return res.status(404).json({success:false,error:"Product not found"});
+    }
+    
+    logger.info("Update Product's Quantity with 0");
+    res.status(200).json({ success: true, data: product });
+  } 
+  
+  catch (error) {
+    logger.error("Error updating product:", error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+exports.updateProductQuantity = async (req, res) => {
+  try
+  {
+    const {id} = req.params;
+    const {quantity} = req.body;
+    
+    if(!quantity || typeof quantity !== "string")
+    {
+      return res.status(400).json({ success: false, error: "Provide Quantity in Number"});
+    }
+    
+    const product = await Product.findByIdAndUpdate(
+      id,
+        {quantity},
+        {new:true}
+    );
+    
+    if(!product)
+    {
+      return res.status(404).json({success:false,error:"Product not found"});
+    }
+    
+    logger.info("Update Product's Quantity with 0");
+    res.status(200).json({ success: true, data: product });
+  } 
+  
+  catch (error) {
+    logger.error("Error updating product:", error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+exports.reduceproductbyone = async (req,res) => {
+  try {
+    const { id } = req.params;
+    
+    const product = await Product.findOne({ _id: id }).exec();
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+
+    if (product.quantity <= 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Cannot decrease quantity below zero",
+        currentQuantity: product.quantity 
+      });
+    }
+
+    const updatedproduct = await Product.findByIdAndUpdate(
+      id,
+      { $inc: { quantity: -1 } },
+      { new: true }
+    );
+    
+    if (!updatedproduct) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+
+    logger.info("Updated Product's Quantity");
+    res.status(200).json({ success: true, data: product });
+  } catch (error) {
+    logger.error("Error updating product:", error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+}
+
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);

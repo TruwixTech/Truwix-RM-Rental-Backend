@@ -38,8 +38,6 @@ exports.createOrder = async (req, res) => {
       ),
     }));
 
-    logger.info("Products:  mil gya", products);
-
     const expectedDelivery = moment().add(2, "days");
 
     const lastOrder = await Order.findOne().sort({ createdAt: -1 });

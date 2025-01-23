@@ -309,7 +309,6 @@ exports.resetProductQuantity = async (req, res) => {
       return res.status(404).json({success:false,error:"Product not found"});
     }
     
-    logger.info("Update Product's Quantity with 0");
     res.status(200).json({ success: true, data: product });
   } 
   
@@ -341,7 +340,6 @@ exports.updateProductQuantity = async (req, res) => {
       return res.status(404).json({success:false,error:"Product not found"});
     }
     
-    logger.info("Update Product's Quantity with 0");
     res.status(200).json({ success: true, data: product });
   } 
   
@@ -379,8 +377,7 @@ exports.reduceproductbyone = async (req,res) => {
       return res.status(404).json({ success: false, error: "Product not found" });
     }
 
-    logger.info("Updated Product's Quantity");
-    res.status(200).json({ success: true, data: product });
+    res.status(200).json({ success: true, data: updatedproduct });
   } catch (error) {
     logger.error("Error updating product:", error);
     res.status(400).json({ success: false, error: error.message });
@@ -441,7 +438,6 @@ exports.getProductCount = async (req, res) => {
 exports.searchProducts = async (req, res) => {
   try {
     const query = req.query.query;
-    logger.info("query", req.query);
 
     if (!query) {
       return res.status(400).json({ message: "Query parameter is required" });

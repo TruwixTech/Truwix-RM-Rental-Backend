@@ -8,7 +8,6 @@ const {
 } = require("../middlewares/authMiddleware");
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
-const downloadController = require("../controllers/downloadController");
 //const uploadController = require("../controllers/uploadController");
 
 const upload = multer({ storage });
@@ -52,7 +51,7 @@ router.post(
 // Review routes
 router.post("/reviews", authenticate, reviewsController.addReview);
 router.get("/:id/reviews", authenticate, reviewsController.getReviews);
-router.get("/download", downloadController.download);
+
 // POST route to handle file upload
 //router.post("/upload", upload.single("image"), uploadController.uploadImage);
 // router.post("/search", productsController.searchProducts);

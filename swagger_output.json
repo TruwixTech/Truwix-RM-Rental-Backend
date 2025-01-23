@@ -1835,7 +1835,7 @@
         }
       }
     },
-    "/api/invoice/invoice/{id}/download-invoice": {
+    "/api/invoice/{id}/download-invoice": {
       "get": {
         "description": "",
         "parameters": [
@@ -1844,17 +1844,9 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
           }
         ],
         "responses": {
-          "401": {
-            "description": "Unauthorized"
-          },
           "404": {
             "description": "Not Found"
           },

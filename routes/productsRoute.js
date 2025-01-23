@@ -54,6 +54,11 @@ router.post(
   authorizeAdmin,
   productsController.addAddOns
 );
+router.post("/:id/reset-product-quantity",productsController.resetProductQuantity);
+router.put("/:id/update-product-quantity",productsController.updateProductQuantity);
+
+router.put("/:id/reduce-product-quantity-by-one",productsController.reduceproductbyone);
+
 // Review routes
 router.post("/reviews", authenticate, reviewsController.addReview);
 router.get("/:id/reviews", authenticate, reviewsController.getReviews);

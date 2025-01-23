@@ -380,7 +380,7 @@ exports.reduceproductbyone = async (req,res) => {
     }
 
     logger.info("Updated Product's Quantity");
-    res.status(200).json({ success: true, data: product });
+    res.status(200).json({ success: true, data: updatedproduct });
   } catch (error) {
     logger.error("Error updating product:", error);
     res.status(400).json({ success: false, error: error.message });

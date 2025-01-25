@@ -365,19 +365,24 @@ exports.addToCart = async (req, res) => {
       rentMonths: items.rentMonths,
       quantity: items.quantity,
     };
-
+console.log(items.product._id)
     // If a cart exists for the user
     if (cart) {
       // Check if the product is already in the cart
       let existingProduct = cart.items.find(
-        (item) => item.product.toString() === items.product
+        (item) => item.product.toString() === items.product._id
       );
 
       if (existingProduct) {
-        // If the product is already in the cart, return the message
-        return res.status(400).json({
-          success: false,
-          message: "Product already in the cart with a rent configuration",
+        existingProduct.rentOptions.quantity += items.quantity;  // Add to the existing quantity
+
+        // Save the updated cart
+        await cart.save();
+
+        return res.status(200).json({
+          success: true,
+          message: "Updated product quantity in cart with rent option",
+          data: cart,
         });
       } else {
         // If the product is not in the cart, add it with the new rent option

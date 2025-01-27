@@ -1,4 +1,3 @@
-const { log } = require("console");
 const Product = require("../models/Product");
 const { logger } = require("../utils/logger");
 const path = require("path");
@@ -20,7 +19,7 @@ exports.createProduct = async (req, res) => {
       // configType,
       // colorOptions,
       month,
-      // size,
+      size,
       rent3Months,
       rent6Months,
       rent9Months,
@@ -54,7 +53,7 @@ exports.createProduct = async (req, res) => {
       sub_title,
       img: productImages,
       category,
-      // size,
+      size,
       details: {
         description: description,
         // fabricCare: {
@@ -105,6 +104,7 @@ exports.createProductV2 = async (req, res) => {
       month = [],
       rentalOptions = {},
       quantity,
+      size
     } = req.body;
 
     let productImages = img;
@@ -153,6 +153,7 @@ exports.createProductV2 = async (req, res) => {
       },
       rentalOptions: rentalOptionsMap,
       quantity,
+      size
     });
 
     // Save the product to the database
@@ -221,7 +222,7 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { title, sub_title, img, category, details, rentalOptions } =
+    const { title, sub_title, img, category, details, rentalOptions, size } =
       req.body;
 
     const parsedDetails =
@@ -269,6 +270,7 @@ exports.updateProduct = async (req, res) => {
           description: descExtracted,
           month: monthExtracted,
         },
+        size,
         rentalOptions: parsedRentalOptions,
       },
       { new: true, runValidators: true }

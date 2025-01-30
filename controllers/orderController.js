@@ -197,7 +197,7 @@ exports.getStatus = async (req, res) => {
         data: order, // Adjust based on actual response structure
       });
     } else {
-      res.status(200).json({
+      res.status(402).json({
         success: false,
         message: 'Payment failed',
         reason: response.data.data.message, // Adjust based on actual response structure
@@ -497,7 +497,7 @@ exports.updateOrder2GetStatus = async (req, res) => {
         data: order, // Adjust based on actual response structure
       });
     } else {
-      res.status(200).json({
+      res.status(402).json({
         success: false,
         message: 'Payment failed', // Adjust based on actual response structure
       });

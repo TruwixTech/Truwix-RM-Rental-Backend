@@ -22,6 +22,10 @@ const orderSchema = new mongoose.Schema(
       ref: USER,
       required: true,
     },
+    merchantId: {
+      type: String,
+      required: true,
+    },
     products: [
       {
         product: {
@@ -67,6 +71,19 @@ const orderSchema = new mongoose.Schema(
     expectedDelivery: {
       type: Date,
     },
+    MUID: {
+      type: String,
+      required: true,
+    },
+    merchantTransactionId: {
+      type: String,
+      required: true,
+    },
+    paymentStatus:{
+      type: String,
+      enum: ["UNPAID", "PAID"],
+      default: "UNPAID"
+    }
   },
   { timestamps: true }
 );

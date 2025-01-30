@@ -4,14 +4,18 @@ const Order = require("../models/OrderSchema");
 const Product = require("../models/Product");
 const moment = require("moment");
 const Payment = require("../models/PaymentSchema");
+const crypto = require("crypto");
 const { default: Pincode } = require("pincode-distance");
 const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
-const { PRODUCT, INR, ORDER_CANCELLED } = require("../utils/enum");
+const { PRODUCT, INR, ORDER_CANCELLED, PAYMENT_COMPLETED } = require("../utils/enum");
+const axios = require('axios');
+let merchantId = process.env.MERCHANT_ID1;
+let salt_key = process.env.SALT_KEY1;
 
 exports.createOrder = async (req, res) => {
   try {
-    const { cartTotal, cartItems, shippingCost, address } = req.body;
+    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId } = req.body;
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -38,8 +42,6 @@ exports.createOrder = async (req, res) => {
       ),
     }));
 
-    logger.info("Products:  mil gya", products);
-
     const expectedDelivery = moment().add(2, "days");
 
     const lastOrder = await Order.findOne().sort({ createdAt: -1 });
@@ -53,44 +55,82 @@ exports.createOrder = async (req, res) => {
     const paddedNumber = nextNumber.toString().padStart(6, "0");
     const orderNumber = `RMOR${paddedNumber}`;
 
-    const order = Order({
+    const amount = Math.round(totalPrice * 100);
+
+    const orderData = {
+      orderNumber,
       user: userId,
       products,
-      totalPrice: parseFloat(cartTotal).toFixed(2),
-      shippingCost: shippingCost || 0,
-      shippingAddress: address,
+      amount,
+      shippingCost,
+      shippingAddress,
       expectedDelivery,
-      orderNumber,
-    });
-
-    logger.info("Order:", order);
-
-    user.orders.push(order._id);
-    // await user.save();
-    // await order.save();
-
-    Promise.all([user.save(), order.save()])
-
-    logger.info("Order Saved:", order);
-
-
-    const paymentEntry = new Payment({
-      orderId: order._id,
-      amount: parseFloat(cartTotal).toFixed(2),
-      currency: INR,
-      userId,
-    });
-
-    await paymentEntry.save();
-    logger.info(order);
-
-    return res.status(201).json({
-      success: true,
-      data: {
-        orderNumber: order.orderNumber,
-        orderDetails: order,
+      MUID,
+      merchantTransactionId: transactionId,
+      redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
+      callbackUrl: `https://rmfurniturerental.in/`,
+      redirectMode: "REDIRECT",
+      paymentInstrument: {
+        type: "PAY_PAGE",
       },
-    });
+      merchantId: merchantId,
+    };
+
+    const orderData2 = {
+      orderNumber,
+      user: userId,
+      products,
+      totalPrice,
+      shippingCost,
+      shippingAddress,
+      expectedDelivery,
+      MUID,
+      merchantTransactionId: transactionId,
+      redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
+      callbackUrl: `https://rmfurniturerental.in/`,
+      redirectMode: "REDIRECT",
+      paymentInstrument: {
+        type: "PAY_PAGE",
+      },
+      merchantId: merchantId,
+    };
+
+    const keyIndex = 1;
+    const payload = JSON.stringify(orderData);
+    const payloadMain = Buffer.from(payload).toString("base64");
+
+    const string = payloadMain + "/pg/v1/pay" + salt_key;
+    const sha256 = crypto.createHash("sha256").update(string).digest("hex");
+    const checksum = sha256 + "###" + keyIndex;
+
+    const prod_URL = process.env.PHONEPAY_API1;
+
+    const options = {
+      method: "POST",
+      url: prod_URL,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "X-VERIFY": checksum,
+      },
+      data: {
+        request: payloadMain,
+      },
+    };
+    // Send payment request
+    axios.request(options)
+      .then(async (response) => {
+        if (response.status === 200 && response.data.success) {
+          const orderCreated = await Order.create(orderData2);
+          user.orders.push(orderCreated._id);
+          await user.save();
+          res.json(response.data); // Send payment response to the frontend
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(500).send("Payment request failed");
+      })
   } catch (error) {
     logger.error("Error creating order:", error);
 
@@ -100,6 +140,74 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
+
+exports.getStatus = async (req, res) => {
+  const { id: merchantTransactionId } = req.query; // Extract transaction ID from query
+  const keyIndex = 1;
+
+  try {
+    // Construct the string for generating checksum
+    const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;
+    const sha256 = crypto.createHash('sha256').update(string).digest('hex');
+    const checksum = sha256 + '###' + keyIndex;
+
+    // Call the PhonePe status API
+    const options = {
+      method: 'GET',
+      url: process.env.STATUS_API1 + `/pg/v1/status/${merchantId}/${merchantTransactionId}`,
+      headers: {
+        accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-VERIFY': checksum,
+        'X-MERCHANT-ID': merchantId,
+      },
+    };
+
+    const response = await axios(options);
+
+    if (response.data.success) {
+      // Payment is successful, update the order status in the database
+      const order = await Order.findOne(
+        { merchantTransactionId },
+      );
+
+      order.paymentStatus = "PAID"
+
+      await order.save();
+
+      const user = await User.findOne({ _id: order.user });
+
+      await Payment.create({
+        orderId: order._id,
+        status: PAYMENT_COMPLETED,
+        amount: order.totalPrice,
+        currency: INR,
+        userId: user._id,
+      })
+
+      await CartSchema.findOneAndUpdate(
+        { user: order.user },
+        { $set: { items: [] } },
+        { new: true }
+      )
+
+      res.status(200).json({
+        success: true,
+        message: 'Payment successful',
+        data: order, // Adjust based on actual response structure
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        message: 'Payment failed',
+        reason: response.data.data.message, // Adjust based on actual response structure
+      });
+    }
+  } catch (error) {
+    console.error('Error checking payment status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
 
 exports.getOrders = async (req, res) => {
   try {
@@ -283,29 +391,122 @@ exports.updateOrder = async (req, res) => {
 exports.updateOrder2 = async (req, res) => {
   try {
     // Find the order by ID
-    const order = await Order.findById(req.params.id);
+    const { totalPrice, MUID, transactionId } = req.body
+    const { id } = req.params
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { $set: { merchantTransactionId: transactionId } },
+      { new: true, }
+    )
     if (!order) {
       return res.status(404).json({ success: false, error: "Order not found" });
     }
+    const amount = Math.round(totalPrice * 100);
 
-    // Calculate the new endDate to be one month from today's date
-    const today = new Date();
-    const newEndDate = moment(today).add(1, "month").toDate();
+    const orderData = {
+      amount,
+      MUID,
+      merchantTransactionId: transactionId,
+      redirectUrl: `https://rmfurniturerental.in/payment/${transactionId}`,
+      callbackUrl: `https://rmfurniturerental.in/`,
+      redirectMode: "REDIRECT",
+      paymentInstrument: {
+        type: "PAY_PAGE",
+      },
+      merchantId: merchantId,
+    };
 
-    // Update and save the order
-    order.endDate = newEndDate;
-    await order.save();
+    const keyIndex = 1;
+    const payload = JSON.stringify(orderData);
+    const payloadMain = Buffer.from(payload).toString("base64");
 
-    return res.status(200).json({
-      success: true,
-      message: "Order endDate updated successfully",
-      data: order,
-    });
+    const string = payloadMain + "/pg/v1/pay" + salt_key;
+    const sha256 = crypto.createHash("sha256").update(string).digest("hex");
+    const checksum = sha256 + "###" + keyIndex;
+
+    const prod_URL = process.env.PHONEPAY_API1;
+
+    const options = {
+      method: "POST",
+      url: prod_URL,
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "X-VERIFY": checksum,
+      },
+      data: {
+        request: payloadMain,
+      },
+    };
+    // Send payment request
+    axios.request(options)
+      .then(async (response) => {
+        res.json(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(500).send("Payment request failed");
+      })
+
   } catch (error) {
     logger.error("Error updating order endDate:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.updateOrder2GetStatus = async (req, res) => {
+  const { id: merchantTransactionId } = req.query; // Extract transaction ID from query
+  const { orderId } = req.body
+  const keyIndex = 1;
+
+
+  try {
+    // Construct the string for generating checksum
+    const string = `/pg/v1/status/${merchantId}/${merchantTransactionId}` + salt_key;
+    const sha256 = crypto.createHash('sha256').update(string).digest('hex');
+    const checksum = sha256 + '###' + keyIndex;
+
+    // Call the PhonePe status API
+    const options = {
+      method: 'GET',
+      url: process.env.STATUS_API1 + `/pg/v1/status/${merchantId}/${merchantTransactionId}`,
+      headers: {
+        accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-VERIFY': checksum,
+        'X-MERCHANT-ID': merchantId,
+      },
+    };
+    const response = await axios(options);
+    if (response.data.success) {
+      // Payment is successful, update the order status in the database
+      const order = await Order.findOne(
+        { merchantTransactionId },
+      );
+
+      const today = new Date();
+      const newEndDate = moment(today).add(1, "month").toDate();
+      // // Update and save the order
+      // const order = await Order.findById(orderId);
+      order.endDate = newEndDate;
+      await order.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Payment successful',
+        data: order, // Adjust based on actual response structure
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        message: 'Payment failed', // Adjust based on actual response structure
+      });
+    }
+  } catch (error) {
+    console.error('Error checking payment status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
 
 exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
   try {
@@ -366,19 +567,24 @@ exports.addToCart = async (req, res) => {
       rentMonths: items.rentMonths,
       quantity: items.quantity,
     };
-
+console.log(items.product._id)
     // If a cart exists for the user
     if (cart) {
       // Check if the product is already in the cart
       let existingProduct = cart.items.find(
-        (item) => item.product.toString() === items.product
+        (item) => item.product.toString() === items.product._id
       );
 
       if (existingProduct) {
-        // If the product is already in the cart, return the message
-        return res.status(400).json({
-          success: false,
-          message: "Product already in the cart with a rent configuration",
+        existingProduct.rentOptions.quantity += items.quantity;  // Add to the existing quantity
+
+        // Save the updated cart
+        await cart.save();
+
+        return res.status(200).json({
+          success: true,
+          message: "Updated product quantity in cart with rent option",
+          data: cart,
         });
       } else {
         // If the product is not in the cart, add it with the new rent option

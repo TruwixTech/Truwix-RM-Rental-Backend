@@ -15,7 +15,7 @@ const upload = multer({ storage });
 // router.use(authenticate);
 
 // Product routes
-router.get('/search', productsController.searchProducts);
+router.get("/search", productsController.searchProducts);
 
 router.post(
   "/",
@@ -23,6 +23,13 @@ router.post(
   authorizeAdmin,
   upload.array("img", 5),
   productsController.createProduct
+);
+router.post(
+  "/add-product-v2",
+  authenticate,
+  authorizeAdmin,
+  upload.array("img", 5),
+  productsController.createProductV2
 );
 router.get("/", productsController.getProducts);
 router.get("/count", productsController.getProductCount);
@@ -34,7 +41,6 @@ router.put(
   upload.array("newImages", 5), // Handle up to 5 new images
   productsController.updateProduct
 );
-
 
 router.delete(
   "/:id",
@@ -48,6 +54,11 @@ router.post(
   authorizeAdmin,
   productsController.addAddOns
 );
+router.post("/:id/reset-product-quantity",productsController.resetProductQuantity);
+router.put("/:id/update-product-quantity",productsController.updateProductQuantity);
+
+router.put("/:id/reduce-product-quantity-by-one",productsController.reduceproductbyone);
+
 // Review routes
 router.post("/reviews", authenticate, reviewsController.addReview);
 router.get("/:id/reviews", authenticate, reviewsController.getReviews);
@@ -55,6 +66,5 @@ router.get("/:id/reviews", authenticate, reviewsController.getReviews);
 // POST route to handle file upload
 //router.post("/upload", upload.single("image"), uploadController.uploadImage);
 // router.post("/search", productsController.searchProducts);
-
 
 module.exports = router;

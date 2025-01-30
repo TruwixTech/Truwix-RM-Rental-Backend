@@ -7,35 +7,55 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerFile = require("./swagger_output.json");
 const { logger } = require('./utils/logger');
 
+
 const allowedOrigins = [
   "http://localhost:5173", // for development
+  "http://localhost:4000",
   "https://rmrental-backend.vercel.app",
-  "https://rmrental-project.vercel.app/",
-  "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app",
-  "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app/",
-  "https://rmrental-project-git-main-aftab1311s-projects.vercel.app",
-  "https://rmrental-project-git-main-aftab1311s-projects.vercel.app/",
-  "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app",
-  "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app/",
-  "https://rmfurniturerental.in" // for production
+  "https://rmrental-project.vercel.app",
+  // "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app",
+  // "http://rmrental-project-ab15fwi42-aftab1311s-projects.vercel.app/",
+  // "https://rmrental-project-git-main-aftab1311s-projects.vercel.app",
+  // "https://rmrental-project-git-main-aftab1311s-projects.vercel.app/",
+  // "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app",
+  // "https://rmrental-project-cj9xppxtg-aftab1311s-projects.vercel.app/",
+  "https://truwix-rm-rental-backend-dev.vercel.app",
+  "https://rmfurniturerental.in",
+  "https://rm-rental-frontend-dev.vercel.app",
+  "https://truwix-rm-rental-backend-dev.vercel.app/api"
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg =
-          "The CORS policy for this site does not allow access from the specified origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         const msg =
+//           "The CORS policy for this site does not allow access from the specified origin.";
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     },
+//     credentials: true,
+//   })
+// );
 
-app.options("*", cors());
+// app.options("*", cors());
+
+const corsOptions = {
+  origin: function(origin, callback){
+      if(!origin || allowedOrigins.indexOf(origin) !== -1){
+          callback(null, true); // Allow the origin
+      }else{
+          callback(new Error('Origin not allowed by Cors'));
+      }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}
+
+app.use(cors(corsOptions));
 
 const PORT = process.env.PORT || 4000;
 
@@ -53,9 +73,11 @@ app.use("/api/products", product);
 
 const order = require("./routes/orderRoute");
 const coupon = require("./routes/couponRoute");
+const invoice = require("./routes/invoiceRoute");
 
 app.use("/api/coupon", coupon);
 app.use("/api", order);
+app.use("/api/invoice", invoice);
 
 app.listen(PORT, () => {
     logger.info(`App listening on port ${PORT}`);

@@ -171,6 +171,10 @@ exports.getStatus = async (req, res) => {
         { merchantTransactionId },
       );
 
+      order.paymentStatus = "PAID"
+
+      await order.save();
+
       const user = await User.findOne({ _id: order.user });
 
       await Payment.create({
@@ -388,10 +392,15 @@ exports.updateOrder2 = async (req, res) => {
   try {
     // Find the order by ID
     const { totalPrice, MUID, transactionId } = req.body
-    // const order = await Order.findById(req.params.id);
-    // if (!order) {
-    //   return res.status(404).json({ success: false, error: "Order not found" });
-    // }
+    const { id } = req.params
+    const order = await Order.findByIdAndUpdate(
+      id,
+      { $set: { merchantTransactionId: transactionId } },
+      { new: true, }
+    )
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
     const amount = Math.round(totalPrice * 100);
 
     const orderData = {
@@ -450,8 +459,6 @@ exports.updateOrder2GetStatus = async (req, res) => {
   const { orderId } = req.body
   const keyIndex = 1;
 
-  console.log(merchantTransactionId)
-  console.log(orderId)
 
   try {
     // Construct the string for generating checksum
@@ -471,13 +478,16 @@ exports.updateOrder2GetStatus = async (req, res) => {
       },
     };
     const response = await axios(options);
-    console.log(response)
     if (response.data.success) {
       // Payment is successful, update the order status in the database
+      const order = await Order.findOne(
+        { merchantTransactionId },
+      );
+
       const today = new Date();
       const newEndDate = moment(today).add(1, "month").toDate();
-      // Update and save the order
-      const order = await Order.findById(orderId);
+      // // Update and save the order
+      // const order = await Order.findById(orderId);
       order.endDate = newEndDate;
       await order.save();
 

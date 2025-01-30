@@ -68,7 +68,7 @@ exports.createOrder = async (req, res) => {
       MUID,
       merchantTransactionId: transactionId,
       redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
-      callbackUrl: `http://localhost:5173/`,
+      callbackUrl: `https://rmfurniturerental.in/`,
       redirectMode: "REDIRECT",
       paymentInstrument: {
         type: "PAY_PAGE",
@@ -87,7 +87,7 @@ exports.createOrder = async (req, res) => {
       MUID,
       merchantTransactionId: transactionId,
       redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
-      callbackUrl: `http://localhost:5173/`,
+      callbackUrl: `https://rmfurniturerental.in/`,
       redirectMode: "REDIRECT",
       paymentInstrument: {
         type: "PAY_PAGE",
@@ -407,8 +407,8 @@ exports.updateOrder2 = async (req, res) => {
       amount,
       MUID,
       merchantTransactionId: transactionId,
-      redirectUrl: `http://localhost:5173/payment/${transactionId}`,
-      callbackUrl: `http://localhost:5173/`,
+      redirectUrl: `https://rmfurniturerental.in/payment/${transactionId}`,
+      callbackUrl: `https://rmfurniturerental.in/`,
       redirectMode: "REDIRECT",
       paymentInstrument: {
         type: "PAY_PAGE",

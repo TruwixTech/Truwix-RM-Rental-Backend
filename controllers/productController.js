@@ -195,7 +195,7 @@ exports.getProducts = async (req, res) => {
       p.addOns = addOns.filter((a) => a.product.equals(p._id));
       return p;
     });
-    
+
     res.status(200).json({ success: true, data: products });
   } catch (error) {
     logger.error(error);
@@ -222,29 +222,29 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { title, sub_title, img, category, details, rentalOptions, size } =
-      req.body;
+    const { title, sub_title, img, category, details, rentalOptions, size } = req.body;
 
-    const parsedDetails =
-      typeof details === "string" ? JSON.parse(details) : details;
+    // Parse details if sent as a string
+    const parsedDetails = typeof details === "string" ? JSON.parse(details) : details;
 
-    // Extract description and month into separate variables
+    // Extract description and month from parsed details
     const descExtracted = parsedDetails.description;
-    const monthExtracted = Array.isArray(parsedDetails.month)
-      ? parsedDetails.month
-      : [];
+    const monthExtracted = Array.isArray(parsedDetails.month) ? parsedDetails.month : [];
 
-    logger.info(img);
-
-    // Initialize img with existing images from request
+    // Initialize img with existing images from the request
     let newImg = Array.isArray(img) ? img : [img]; // Ensure img is an array
 
     // Add any new files uploaded to the img array
     if (req.files && req.files.length > 0) {
-      const uploadedImages = req.files.map(
-        (file) =>
-          `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+      const results = await Promise.all(
+        req.files.map((file) =>
+          cloudinary.uploader.upload(file.path, {
+            folder: "productImages",
+            transformation: [{ width: 500, height: 500, crop: "limit" }],
+          })
+        )
       );
+      const uploadedImages = results.map((result) => result.secure_url);
       newImg = [...newImg, ...uploadedImages]; // Combine existing and new images
     }
 
@@ -252,19 +252,15 @@ exports.updateProduct = async (req, res) => {
     newImg = newImg.filter((image) => image && image.trim() !== "");
 
     // Parse rentalOptions if it's sent as a string
-    const parsedRentalOptions =
-      typeof rentalOptions === "string"
-        ? JSON.parse(rentalOptions)
-        : rentalOptions;
+    const parsedRentalOptions = typeof rentalOptions === "string" ? JSON.parse(rentalOptions) : rentalOptions;
 
-    logger.info(newImg);
-
+    // Find and update the product by its ID
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       {
         title,
         sub_title,
-        img: newImg, // Updated images array without nulls
+        img: newImg, // Updated images array
         category,
         details: {
           description: descExtracted,
@@ -276,12 +272,12 @@ exports.updateProduct = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    // If the product is not found, return a 404 response
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Product not found" });
+      return res.status(404).json({ success: false, error: "Product not found" });
     }
 
+    // Return the updated product
     res.status(200).json({ success: true, data: product });
   } catch (error) {
     logger.error("Error updating product:", error);
@@ -289,31 +285,29 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+
 exports.resetProductQuantity = async (req, res) => {
-  try
-  {
-    const {id} = req.params;
+  try {
+    const { id } = req.params;
     let quantity = 0;
-    
-    if(!id || typeof id !== "string")
-    {
+
+    if (!id || typeof id !== "string") {
       return res.status(400).json({ success: false, error: "Invalid ID provided" });
     }
-    
+
     const product = await Product.findByIdAndUpdate(
       id,
-        {quantity},
-        {new:true}
+      { quantity },
+      { new: true }
     );
-    
-    if(!product)
-    {
-      return res.status(404).json({success:false,error:"Product not found"});
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
     }
-    
+
     res.status(200).json({ success: true, data: product });
-  } 
-  
+  }
+
   catch (error) {
     logger.error("Error updating product:", error);
     res.status(400).json({ success: false, error: error.message });
@@ -321,40 +315,37 @@ exports.resetProductQuantity = async (req, res) => {
 };
 
 exports.updateProductQuantity = async (req, res) => {
-  try
-  {
-    const {id} = req.params;
-    const {quantity} = req.body;
-    
-    if(!quantity || typeof quantity !== "string")
-    {
-      return res.status(400).json({ success: false, error: "Provide Quantity in Number"});
+  try {
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    if (!quantity || typeof quantity !== "string") {
+      return res.status(400).json({ success: false, error: "Provide Quantity in Number" });
     }
-    
+
     const product = await Product.findByIdAndUpdate(
       id,
-        {quantity},
-        {new:true}
+      { quantity },
+      { new: true }
     );
-    
-    if(!product)
-    {
-      return res.status(404).json({success:false,error:"Product not found"});
+
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
     }
-    
+
     res.status(200).json({ success: true, data: product });
-  } 
-  
+  }
+
   catch (error) {
     logger.error("Error updating product:", error);
     res.status(400).json({ success: false, error: error.message });
   }
 };
 
-exports.reduceproductbyone = async (req,res) => {
+exports.reduceproductbyone = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const product = await Product.findOne({ _id: id }).exec();
 
     if (!product) {
@@ -362,10 +353,10 @@ exports.reduceproductbyone = async (req,res) => {
     }
 
     if (product.quantity <= 0) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         error: "Cannot decrease quantity below zero",
-        currentQuantity: product.quantity 
+        currentQuantity: product.quantity
       });
     }
 
@@ -374,7 +365,7 @@ exports.reduceproductbyone = async (req,res) => {
       { $inc: { quantity: -1 } },
       { new: true }
     );
-    
+
     if (!updatedproduct) {
       return res.status(404).json({ success: false, error: "Product not found" });
     }

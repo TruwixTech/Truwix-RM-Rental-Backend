@@ -222,7 +222,7 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { title, sub_title, img, category, details, rentalOptions, size } = req.body;
+    const { title, sub_title, category, existingImages, details, rentalOptions, size } = req.body;
 
     // Parse details if sent as a string
     const parsedDetails = typeof details === "string" ? JSON.parse(details) : details;
@@ -232,7 +232,7 @@ exports.updateProduct = async (req, res) => {
     const monthExtracted = Array.isArray(parsedDetails.month) ? parsedDetails.month : [];
 
     // Initialize img with existing images from the request
-    let newImg = Array.isArray(img) ? img : [img]; // Ensure img is an array
+    let newImg = existingImages ? (Array.isArray(existingImages) ? existingImages : [existingImages]) : [];
 
     // Add any new files uploaded to the img array
     if (req.files && req.files.length > 0) {

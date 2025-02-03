@@ -48,8 +48,7 @@ exports.googleOAuth = async (req, res) => {
         name: user?.name,
         role: user?.role,
       },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
+      process.env.JWT_SECRET
     );
 
     res.status(200).json({
@@ -178,8 +177,7 @@ exports.login = async (req, res) => {
     if (isPasswordValid) {
       const token = jwt.sign(
         { email: user.email, id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
+        process.env.JWT_SECRET
       );
 
       user.password = undefined;

@@ -7,9 +7,9 @@ const PDFDocument = require('pdfkit');
 exports.createInvoice = async (req, res) => {
   try {
     const paymentData = req.body;
-
     const invoice = new Invoice({
       invoiceNumber: `INV-${uuidv4()}`,
+      orderId: paymentData.orderId,
       userId: paymentData.userId,
       paymentId: paymentData.paymentId,
       amount: paymentData.amount,
@@ -17,11 +17,15 @@ exports.createInvoice = async (req, res) => {
     });
 
     await invoice.save();
-    res.status(201).json({ success: true, message: 'Invoice generated', invoice });
+    res
+      .status(201)
+      .json({ success: true, message: "Invoice generated", invoice });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error generating invoice', error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error generating invoice", error });
   }
-};
+}
 
 
 exports.getAllInvoices = async (req, res) => {

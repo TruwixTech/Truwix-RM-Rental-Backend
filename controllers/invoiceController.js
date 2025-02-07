@@ -25,23 +25,7 @@ exports.createInvoice = async (req, res) => {
       .json({ success: false, message: "Error generating invoice", error });
   }
 };
-  try {
-    const paymentData = req.body;
-
-    const invoice = new Invoice({
-      invoiceNumber: `INV-${uuidv4()}`,
-      userId: paymentData.userId,
-      paymentId: paymentData.paymentId,
-      amount: paymentData.amount,
-      items: paymentData.items,
-    });
-
-    await invoice.save();
-    res.status(201).json({ success: true, message: 'Invoice generated', invoice });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error generating invoice', error });
-  }
-};
+  
 
 
 exports.getAllInvoices = async (req, res) => {

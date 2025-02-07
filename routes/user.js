@@ -35,6 +35,7 @@ const { getDistance } = require("../controllers/shippingController");
 
 router.post("/oauth", googleOAuth);
 router.post("/user-details", userDetails)
+router.post("/user-update", user_update);
 router.post("/login", login);
 router.post("/signup", signup);
 router.patch("/password", forgotPassword);

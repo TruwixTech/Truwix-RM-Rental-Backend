@@ -154,6 +154,36 @@ exports.signup = async (req, res) => {
   }
 };
 
+exports.user_update = async (req,res) =>{
+    try
+    {
+      const {new_name,new_email,new_password,new_mobileNumber,new_address} = req.body;
+
+      if(!new_name || !new_email)
+      {
+        return res.status(400).json({
+          success: false,
+          message: "Please add new name and email",
+        });
+      }
+
+      await findByIdAndUpdate( email, 
+        {name:new_name},
+        {password:new_password},
+        {email:new_email},
+        {mobileNumber:new_mobileNumber},
+        {address:new_address},
+        {new:true}
+      );
+    }
+    catch{
+      logger.error(error);
+      res
+        .status(500)
+        .json({ success: false, message: "Login failure. Please try again" });
+    }
+}
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;

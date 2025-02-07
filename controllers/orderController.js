@@ -520,7 +520,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       { status: newStatus },
-      { new: true }
+      { new: true } 
     );
 
   const order = await Order.findById(orderId);

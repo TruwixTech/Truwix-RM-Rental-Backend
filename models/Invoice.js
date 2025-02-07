@@ -3,11 +3,15 @@ const { INR, USER, PAID, UNPAID } = require('../utils/enum');
 
 const itemSchema = new mongoose.Schema(
   {
-    name: String,
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true,
+    },
     quantity: Number,
-    price: Number,
+    expirationDate: Date,
   },
-  { _id: false } 
+  { _id: false }
 );
 
 const InvoiceSchema = new mongoose.Schema({
@@ -18,15 +22,15 @@ const InvoiceSchema = new mongoose.Schema({
     ref: 'Order',
     required: true,
   },
-  paymentId: { type: String, required: true },
+  paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment', required: true },
   amount: { type: Number, required: true },
   currency: { type: String, default: INR },
   items: [
-   itemSchema,
+    itemSchema,
   ],
   status: { type: String, enum: [PAID, UNPAID], default: PAID },
 },
-{ timestamps: true }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);

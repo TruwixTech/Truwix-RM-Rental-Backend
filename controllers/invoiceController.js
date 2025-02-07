@@ -2,18 +2,22 @@ const { v4: uuidv4 } = require('uuid');
 const Invoice = require('../models/Invoice');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
+const Payment = require('../models/PaymentSchema');
 
 
 exports.createInvoice = async (req, res) => {
   try {
     const paymentData = req.body;
+
+    const payment = await Payment.findOne({ userId: paymentData.user });
+
     const invoice = new Invoice({
       invoiceNumber: `INV-${uuidv4()}`,
-      orderId: paymentData.orderId,
-      userId: paymentData.userId,
-      paymentId: paymentData.paymentId,
-      amount: paymentData.amount,
-      items: paymentData.items,
+      orderId: paymentData._id,
+      userId: paymentData.user,
+      paymentId: payment._id,
+      amount: paymentData.totalPrice,
+      items: paymentData.products,
     });
 
     await invoice.save();

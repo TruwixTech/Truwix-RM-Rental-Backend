@@ -24,8 +24,11 @@ const BED_ROOM = "bedroom";
 const TABLE = "table";
 const PAID = "Paid";
 const UNPAID = "Unpaid";
+const PACKAGE = "package";
+const DINNINGROOM = "dinningroom";
 module.exports = {
   USER,
+  DINNINGROOM,
   ADMIN,
   ORDER,
   PRODUCT,
@@ -51,4 +54,5 @@ module.exports = {
   TABLE,
   PAID,
   UNPAID,
+  PACKAGE
 };

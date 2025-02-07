@@ -6,6 +6,8 @@ const {
   STUDY_ROOM,
   BED_ROOM,
   TABLE,
+  PACKAGE,
+  DINNINGROOM,
 } = require("../utils/enum");
 
 const productSchema = new mongoose.Schema(
@@ -29,7 +31,7 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: [APPLIANCE, LIVING_ROOM, STORAGE, STUDY_ROOM, BED_ROOM, TABLE],
+      enum: [APPLIANCE, LIVING_ROOM, STORAGE, STUDY_ROOM, BED_ROOM, TABLE, PACKAGE, DINNINGROOM],
       required: [true, "Product category is required"],
       index: true,
     },

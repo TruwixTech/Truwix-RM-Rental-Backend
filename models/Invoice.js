@@ -13,6 +13,11 @@ const itemSchema = new mongoose.Schema(
 const InvoiceSchema = new mongoose.Schema({
   invoiceNumber: { type: String, unique: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: USER, required: true },
+  orderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order',
+    required: true,
+  },
   paymentId: { type: String, required: true },
   amount: { type: Number, required: true },
   currency: { type: String, default: INR },

@@ -530,7 +530,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Order status updated successfully" });
+      .json({ success: true, message: "Order status updated successfully" , data: updatedOrder});
   } catch (error) {
     logger.error("Error updating order status:", error);
     return res

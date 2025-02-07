@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { INR, USER, PAID, UNPAID } = require('../utils/enum');
+const { INR, USER, PAID, UNPAID, ORDER } = require('../utils/enum');
 
 const itemSchema = new mongoose.Schema(
   {
@@ -11,7 +11,9 @@ const itemSchema = new mongoose.Schema(
 );
 
 const InvoiceSchema = new mongoose.Schema({
+
   invoiceNumber: { type: String, unique: true },
+  orderId: {type: mongoose.Schema.Types.ObjectId, ref: ORDER, required: true},
   userId: { type: mongoose.Schema.Types.ObjectId, ref: USER, required: true },
   paymentId: { type: String, required: true },
   amount: { type: Number, required: true },

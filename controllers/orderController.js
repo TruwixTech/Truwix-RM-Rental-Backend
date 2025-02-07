@@ -10,6 +10,7 @@ const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
 const { PRODUCT, INR, ORDER_CANCELLED, PAYMENT_COMPLETED } = require("../utils/enum");
 const axios = require('axios');
+const {mailsender} = require("../service/mail");
 let merchantId = process.env.MERCHANT_ID1;
 let salt_key = process.env.SALT_KEY1;
 
@@ -521,6 +522,38 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
       { status: newStatus },
       { new: true }
     );
+
+  const order = await Order.findById(orderId);
+  const user = await User.findById(order.user);
+  console.log(user.email);
+  if (!order) {
+    console.error("Order not found");
+    return;
+  }
+
+  console.log("Order Found: ", order);
+  
+  // Fetch product details using product IDs
+  const productsWithDetails = await Promise.all(
+    order.products.map(async (p) => {
+      const product = await Product.findById(p.product);
+      return {
+        title: product ? product.title : "Unknown Product",
+        sub_title: product ? product.sub_title : "",
+        category: product ? product.category : "N/A",
+        quantity: p.quantity,
+        expirationDate: p.expirationDate,
+      };
+    })
+  );
+  console.log("Products :" + productsWithDetails);
+
+  if(newStatus == 'delivered')
+    {
+      console.log("True");
+      await mailsender(orderId,productsWithDetails,user.email);
+      console.log("Mail sent");
+    }
 
     if (!updatedOrder) {
       return res

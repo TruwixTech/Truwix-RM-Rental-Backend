@@ -651,6 +651,9 @@
                 "month": {
                   "example": "any"
                 },
+                "size": {
+                  "example": "any"
+                },
                 "rent3Months": {
                   "example": "any"
                 },
@@ -720,6 +723,9 @@
               "type": "object",
               "properties": {
                 "quantity": {
+                  "example": "any"
+                },
+                "size": {
                   "example": "any"
                 }
               }
@@ -807,16 +813,19 @@
                 "sub_title": {
                   "example": "any"
                 },
-                "img": {
+                "category": {
                   "example": "any"
                 },
-                "category": {
+                "existingImages": {
                   "example": "any"
                 },
                 "details": {
                   "example": "any"
                 },
                 "rentalOptions": {
+                  "example": "any"
+                },
+                "size": {
                   "example": "any"
                 }
               }
@@ -1179,16 +1188,22 @@
             "schema": {
               "type": "object",
               "properties": {
-                "cartTotal": {
+                "cartItems": {
                   "example": "any"
                 },
-                "cartItems": {
+                "totalPrice": {
                   "example": "any"
                 },
                 "shippingCost": {
                   "example": "any"
                 },
-                "address": {
+                "shippingAddress": {
+                  "example": "any"
+                },
+                "MUID": {
+                  "example": "any"
+                },
+                "transactionId": {
                   "example": "any"
                 }
               }
@@ -1196,8 +1211,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
+          "200": {
+            "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
@@ -1252,8 +1267,8 @@
         }
       }
     },
-    "/api/order/verifyPayment": {
-      "post": {
+    "/api/order/status": {
+      "get": {
         "description": "",
         "parameters": [
           {
@@ -1262,30 +1277,23 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "orderId": {
-                  "example": "any"
-                },
-                "status": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "id",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "401": {
             "description": "Unauthorized"
+          },
+          "402": {
+            "description": "Payment Required"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -1454,11 +1462,6 @@
         "description": "",
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
             "name": "body",
             "in": "body",
             "schema": {
@@ -1477,9 +1480,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
           },
           "404": {
             "description": "Not Found"
@@ -1608,9 +1608,6 @@
           },
           "201": {
             "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1832,6 +1829,24 @@
             "name": "authorization",
             "in": "header",
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "totalPrice": {
+                  "example": "any"
+                },
+                "MUID": {
+                  "example": "any"
+                },
+                "transactionId": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1843,6 +1858,37 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/order/update-status": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "402": {
+            "description": "Payment Required"
           },
           "500": {
             "description": "Internal Server Error"

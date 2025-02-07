@@ -180,7 +180,7 @@ exports.user_update = async (req,res) =>{
       logger.error(error);
       res
         .status(500)
-        .json({ success: false, message: "Login failure. Please try again" });
+        .json({ success: false, message: "UserUpdation failure. Please try again" });
     }
 }
 

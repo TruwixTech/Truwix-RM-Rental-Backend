@@ -10,7 +10,8 @@ const {
   addAddress,
   forgotPassword,
   googleOAuth,
-  userDetails
+  userDetails,
+  user_update
 } = require("../controllers/Auth");
 const { authenticate } = require("../middlewares/authMiddleware");
 const {

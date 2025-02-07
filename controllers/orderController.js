@@ -16,7 +16,7 @@ let salt_key = process.env.SALT_KEY1;
 
 exports.createOrder = async (req, res) => {
   try {
-    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId } = req.body;
+    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId , amenities} = req.body;
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -87,6 +87,7 @@ exports.createOrder = async (req, res) => {
       expectedDelivery,
       MUID,
       merchantTransactionId: transactionId,
+      amenities,
       redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
       callbackUrl: `https://rmfurniturerental.in/`,
       redirectMode: "REDIRECT",

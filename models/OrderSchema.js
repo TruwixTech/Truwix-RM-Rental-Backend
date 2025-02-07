@@ -16,7 +16,11 @@ const orderSchema = new mongoose.Schema(
       unique: true, // Ensure unique order numbers
       required: true,
     },
-
+    amenities: {
+    type:Boolean,
+    required:true,
+    default:false,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: USER,

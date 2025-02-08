@@ -44,8 +44,7 @@ const userSchema = mongoose.Schema(
     },
     googleId: String,
     address: {
-      type: Array,
-      default: [],
+      type: String,
     },
   },
   { timestamps: true }

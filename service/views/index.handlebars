@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif;">
+    <h2>Order Confirmation</h2>
+    <p>Thank you for your order, {{orderNumber}}.</p>
+    
+    <h3>Order Details</h3>
+    <p><strong>Order Number:</strong> {{orderNumber}}</p>
+    <p><strong>Status:</strong> {{status}}</p>
+    <p><strong>Order Date:</strong> {{orderDate}}</p>
+    <p><strong>Expected Delivery:</strong> {{expectedDelivery}}</p>
+    <p><strong>Total Price:</strong> ${{totalPrice}}</p>
+    <p><strong>Shipping Cost:</strong> ${{shippingCost}}</p>
+    
+    <h3>Shipping Address</h3>
+    <p>{{shippingAddress}}</p>
+    
+    <h3>Products Ordered</h3>
+<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each products}}
+        <tr>
+            <td>{{this.title}}</td>
+            <td>{{this.category}}</td>
+            <td>{{this.quantity}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+    
+    <p>If you have any questions, feel free to contact us.</p>
+    <p>Thank you for shopping with us!</p>
+</body>
+</html>

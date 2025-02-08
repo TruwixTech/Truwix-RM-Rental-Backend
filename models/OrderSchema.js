@@ -16,7 +16,11 @@ const orderSchema = new mongoose.Schema(
       unique: true, // Ensure unique order numbers
       required: true,
     },
-
+    amenities: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: USER,
@@ -79,7 +83,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    paymentStatus:{
+    paymentStatus: {
       type: String,
       enum: ["UNPAID", "PAID"],
       default: "UNPAID"

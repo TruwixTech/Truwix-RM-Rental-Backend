@@ -10,6 +10,7 @@ const ORDER_PENDING = "pending";
 const ORDER_SHIPPED = "shipped";
 const ORDER_CANCELLED = "cancelled";
 const ORDER_DELIVERED = "delivered";
+const ORDER_RETURNED = "returned";
 const PAYMENT_PENDING = "pending";
 const PAYMENT_COMPLETED = "completed";
 const PAYMENT_FAILED = "failed";

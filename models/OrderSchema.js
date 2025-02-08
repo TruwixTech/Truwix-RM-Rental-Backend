@@ -7,6 +7,7 @@ const {
   ORDER_SHIPPED,
   ORDER_CANCELLED,
   ORDER_DELIVERED,
+  ORDER_RETURNED,
 } = require("../utils/enum");
 
 const orderSchema = new mongoose.Schema(
@@ -54,6 +55,7 @@ const orderSchema = new mongoose.Schema(
         ORDER_SHIPPED,
         ORDER_CANCELLED,
         ORDER_DELIVERED,
+        ORDER_RETURNED,
       ],
       default: ORDER_PENDING,
     },

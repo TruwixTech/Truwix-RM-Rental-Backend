@@ -10,7 +10,8 @@ const {
   addAddress,
   forgotPassword,
   googleOAuth,
-  userDetails
+  userDetails,
+  userUpdate,
 } = require("../controllers/Auth");
 const { authenticate } = require("../middlewares/authMiddleware");
 const {
@@ -35,6 +36,7 @@ const { getDistance } = require("../controllers/shippingController");
 
 router.post("/oauth", googleOAuth);
 router.post("/user-details", userDetails)
+router.post("/user-update", userUpdate);
 router.post("/login", login);
 router.post("/signup", signup);
 router.patch("/password", forgotPassword);

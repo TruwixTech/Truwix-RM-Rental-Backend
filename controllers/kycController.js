@@ -50,7 +50,7 @@ exports.updateKYCStatus = async (req, res) => {
 exports.getAllKYC = async (req, res) => {
   try {
     const kycs = await KYC.find()
-      .populate("userId", "name email mobileNumber") // Populate user with name, email, and mobileNumber
+      .populate("userId", "name email mobileNumber customerId") // Populate user with name, email, and mobileNumber
       .exec(); // Execute the query
 
     return res.status(200).json({

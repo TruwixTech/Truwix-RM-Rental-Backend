@@ -111,11 +111,10 @@ exports.signup = async (req, res) => {
     }
 
     // validate email
-    if(!validator.validate(email))
-    {
+    if (!validator.validate(email)) {
       return res
-      .status(400)
-      .json({ success: false, message: "Invalid email" });
+        .status(400)
+        .json({ success: false, message: "Invalid email" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -154,34 +153,46 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.user_update = async (req,res) =>{
-    try
-    {
-      const {new_name,new_email,new_password,new_mobileNumber,new_address} = req.body;
+exports.userUpdate = async (req, res) => {
+  try {
+    const { new_name, new_email, new_mobileNumber, new_address, userID } = req.body;
 
-      if(!new_name || !new_email)
+    if (!new_name || !new_email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please add new name and email",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: userID }, // Find user by email
       {
-        return res.status(400).json({
-          success: false,
-          message: "Please add new name and email",
-        });
-      }
+        email: new_email,
+        name: new_name,
+        mobileNumber: new_mobileNumber,
+        address: new_address,
+      },
+      { new: true }
+    );
 
-      await findByIdAndUpdate( email, 
-        {name:new_name},
-        {password:new_password},
-        {email:new_email},
-        {mobileNumber:new_mobileNumber},
-        {address:new_address},
-        {new:true}
-      );
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-    catch{
-      logger.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "UserUpdation failure. Please try again" });
-    }
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+    });
+  }
+  catch {
+    logger.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "UserUpdation failure. Please try again" });
+  }
 }
 
 exports.login = async (req, res) => {

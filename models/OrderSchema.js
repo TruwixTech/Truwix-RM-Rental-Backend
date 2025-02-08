@@ -17,9 +17,9 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     amenities: {
-    type:Boolean,
-    required:true,
-    default:false,
+      type: Boolean,
+      required: true,
+      default: false,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -83,7 +83,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    paymentStatus:{
+    paymentStatus: {
       type: String,
       enum: ["UNPAID", "PAID"],
       default: "UNPAID"

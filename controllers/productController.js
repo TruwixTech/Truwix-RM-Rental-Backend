@@ -222,7 +222,7 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { title, sub_title, category, existingImages, details, rentalOptions, size } = req.body;
+    const { title, sub_title, category, existingImages, details, rentalOptions, size, quantity } = req.body;
 
     // Parse details if sent as a string
     const parsedDetails = typeof details === "string" ? JSON.parse(details) : details;
@@ -261,6 +261,7 @@ exports.updateProduct = async (req, res) => {
         title,
         sub_title,
         img: newImg, // Updated images array
+        quantity,
         category,
         details: {
           description: descExtracted,

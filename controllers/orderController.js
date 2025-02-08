@@ -10,13 +10,28 @@ const { COST_MAPPING } = require("../utils/config");
 const User = require("../models/User");
 const { PRODUCT, INR, ORDER_CANCELLED, PAYMENT_COMPLETED } = require("../utils/enum");
 const axios = require('axios');
-const {mailsender} = require("../service/mail");
+const { mailsender } = require("../service/mail");
 let merchantId = process.env.MERCHANT_ID1;
 let salt_key = process.env.SALT_KEY1;
 
+async function updateProductQuantities(productsToUpdate) {
+  try {
+    const bulkOperations = productsToUpdate.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product._id },
+        update: { $inc: { quantity: -item.rentOptions.quantity } }, // Subtract quantity
+      },
+    }));
+
+    const result = await Product.bulkWrite(bulkOperations);
+  } catch (error) {
+    console.error("Error updating product quantities:", error);
+  }
+}
+
 exports.createOrder = async (req, res) => {
   try {
-    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId , amenities} = req.body;
+    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId, amenities } = req.body;
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -125,6 +140,7 @@ exports.createOrder = async (req, res) => {
         if (response.status === 200 && response.data.success) {
           const orderCreated = await Order.create(orderData2);
           user.orders.push(orderCreated._id);
+          updateProductQuantities(cartItems);
           await user.save();
           res.json(response.data); // Send payment response to the frontend
         }
@@ -521,38 +537,37 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       { status: newStatus },
-      { new: true } 
+      { new: true }
     );
 
-  const order = await Order.findById(orderId);
-  const user = await User.findById(order.user);
-  console.log(user.email);
-  if (!order) {
-    console.error("Order not found");
-    return;
-  }
+    const order = await Order.findById(orderId);
+    const user = await User.findById(order.user);
+    console.log(user.email);
+    if (!order) {
+      console.error("Order not found");
+      return;
+    }
 
-  console.log("Order Found: ", order);
-  
-  // Fetch product details using product IDs
-  const productsWithDetails = await Promise.all(
-    order.products.map(async (p) => {
-      const product = await Product.findById(p.product);
-      return {
-        title: product ? product.title : "Unknown Product",
-        sub_title: product ? product.sub_title : "",
-        category: product ? product.category : "N/A",
-        quantity: p.quantity,
-        expirationDate: p.expirationDate,
-      };
-    })
-  );
-  console.log("Products :" + productsWithDetails);
+    console.log("Order Found: ", order);
 
-  if(newStatus == 'delivered')
-    {
+    // Fetch product details using product IDs
+    const productsWithDetails = await Promise.all(
+      order.products.map(async (p) => {
+        const product = await Product.findById(p.product);
+        return {
+          title: product ? product.title : "Unknown Product",
+          sub_title: product ? product.sub_title : "",
+          category: product ? product.category : "N/A",
+          quantity: p.quantity,
+          expirationDate: p.expirationDate,
+        };
+      })
+    );
+    console.log("Products :" + productsWithDetails);
+
+    if (newStatus == 'delivered') {
       console.log("True");
-      await mailsender(orderId,productsWithDetails,user.email);
+      await mailsender(orderId, productsWithDetails, user.email);
       console.log("Mail sent");
     }
 
@@ -564,7 +579,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Order status updated successfully" , data: updatedOrder});
+      .json({ success: true, message: "Order status updated successfully", data: updatedOrder });
   } catch (error) {
     logger.error("Error updating order status:", error);
     return res
@@ -601,7 +616,7 @@ exports.addToCart = async (req, res) => {
       rentMonths: items.rentMonths,
       quantity: items.quantity,
     };
-console.log(items.product._id)
+    console.log(items.product._id)
     // If a cart exists for the user
     if (cart) {
       // Check if the product is already in the cart

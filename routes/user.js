@@ -17,6 +17,8 @@ const { authenticate } = require("../middlewares/authMiddleware");
 const {
   sendWhatsAppOtp,
   verifyWhatsAppOtp,
+  otpsender,
+  verifyOTP
 } = require("../controllers/otpController");
 const {
   getMyOrderProductNames,
@@ -49,6 +51,9 @@ router.get("/address", authenticate, getAddress);
 router.post("/address", authenticate, addAddress);
 router.delete("/address", authenticate, deleteAddress);
 
+router.post("/test-otp", otpsender);
+
+router.post("/verify-otp", verifyOTP);
 // admin kyc routes
 
 router.get("/kyc", getAllKYC);

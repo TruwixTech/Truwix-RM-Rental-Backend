@@ -5,9 +5,10 @@ const path = require('path');
 const Order = require("../models/OrderSchema");
 
 async function mailsender(orderId,productsWithDetails,res_email) {
-    
+    console.log(orderId,productsWithDetails,res_email);
     logger.info("Mailsender Flag 1");
     const order = await Order.findById(orderId);
+    // console.log("Hello",order)
 
     logger.info("Initializing mail sender...");
     // const user = await User.findById(order.user);

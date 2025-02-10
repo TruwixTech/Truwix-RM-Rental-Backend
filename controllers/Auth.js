@@ -165,7 +165,7 @@ exports.userUpdate = async (req, res) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      { _id: userID }, // Find user by email
+      { _id: userID }, 
       {
         email: new_email,
         name: new_name,

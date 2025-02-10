@@ -123,7 +123,7 @@ exports.verifyOTP = async (req, res) => {
   
   console.log("Received verification request for:", mobileNumber, "with code:", code);
 
-  const gotUser = await USER.findOne({ mobileNumber });
+  const gotUser = await USER.findOne({ mobileNumber }).select("-password")
 
   if (!gotUser) {
     return res.status(404).json({

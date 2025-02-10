@@ -89,6 +89,9 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["UNPAID", "PAID"],
       default: "UNPAID"
+    },
+    feedback:{
+      type: String
     }
   },
   { timestamps: true }

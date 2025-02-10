@@ -34,4 +34,5 @@ router.delete("/order/whishlist", authenticate, orderController.deleteWishlist);
 router.put("/order/whishlist", authenticate, orderController.updateWishlist);
 router.put('/order/update/:id', authenticate, orderController.updateOrder2);
 router.get("/order/update-status", authenticate, orderController.updateOrder2GetStatus);
+router.post("/order/update-feedback", authenticate, orderController.updateFeedback);
 module.exports = router;

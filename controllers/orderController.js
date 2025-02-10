@@ -542,13 +542,13 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
 
     const order = await Order.findById(orderId);
     const user = await User.findById(order.user);
-    console.log(user.email);
+    // console.log(user.email);
     if (!order) {
       console.error("Order not found");
       return;
     }
 
-    console.log("Order Found: ", order);
+    // console.log("Order Found: ", user);
 
     // Fetch product details using product IDs
     const productsWithDetails = await Promise.all(
@@ -563,12 +563,12 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
         };
       })
     );
-    console.log("Products :" + productsWithDetails);
+    // console.log("Products :" + productsWithDetails);
 
     if (newStatus == 'delivered') {
-      console.log("True");
+      // console.log("True");
       await mailsender(orderId, productsWithDetails, user.email);
-      console.log("Mail sent");
+      // console.log("Mail sent");
     }
 
     if (!updatedOrder) {
@@ -616,7 +616,7 @@ exports.addToCart = async (req, res) => {
       rentMonths: items.rentMonths,
       quantity: items.quantity,
     };
-    console.log(items.product._id)
+    // console.log(items.product._id)
     // If a cart exists for the user
     if (cart) {
       // Check if the product is already in the cart
@@ -952,5 +952,45 @@ exports.getTotalCost = async (req, res) => {
     res.status(200).json({ success: true, data: totalCost });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+
+exports.updateFeedback = async (req, res) => {
+  try {
+    const { feedback, ordersIds } = req.body; // Receiving feedback and orderIds array
+
+    if (!feedback) {
+      return res.status(400).json({
+        success: false,
+        error: "Feedback is required",
+      });
+    }
+
+    if (!Array.isArray(ordersIds) || ordersIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "orderIds must be a non-empty array",
+      });
+    }
+
+    // Updating feedback for multiple orders
+    const updatedOrders = await Order.updateMany(
+      { _id: { $in: ordersIds } }, // Filter orders where _id is in orderIds array
+      { $set: { feedback } }, // Set feedback field
+      { new: true } // Return updated documents (optional for updateMany)
+    );
+
+    if (!updatedOrders.modifiedCount) {
+      return res.status(404).json({
+        success: false,
+        error: "No orders were updated",
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Feedback updated successfully" });
+
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };

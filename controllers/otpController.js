@@ -120,8 +120,6 @@ exports.otpsender = async (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
   const { mobileNumber, code } = req.body;
-  
-  console.log("Received verification request for:", mobileNumber, "with code:", code);
 
   const gotUser = await USER.findOne({ mobileNumber }).select("-password")
 

@@ -3,9 +3,9 @@ const hbs = require('nodemailer-handlebars');
 const dotenv = require('dotenv');
 const path = require('path');
 const Order = require("../models/OrderSchema");
-
+const { logger } = require('../utils/logger');
 async function mailsender(orderId,productsWithDetails,res_email) {
-    console.log(orderId,productsWithDetails,res_email);
+    // console.log(orderId,productsWithDetails,res_email);
     logger.info("Mailsender Flag 1");
     const order = await Order.findById(orderId);
     // console.log("Hello",order)
@@ -60,7 +60,7 @@ async function mailsender(orderId,productsWithDetails,res_email) {
           products: productsWithDetails,
         },
       };
-  
+      logger.info("Flag reached");
     try {
       await transporter.sendMail(mailOptions);
       logger.info(`Email sent to ${res_email} with order : ${order}`);
@@ -70,5 +70,57 @@ async function mailsender(orderId,productsWithDetails,res_email) {
       throw new Error("Failed to send OTP email.");
     }
   }
+
+  async function mailsend_details(app_details) {
+    
+    logger.info("Initializing mail sender...");
+    
   
-  module.exports = {mailsender};
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_SEND,
+        pass: process.env.EMAIL_SEND_PASS,
+      },
+    });
+  
+    logger.info("Transporter created successfully!");
+    
+    // Ensure Handlebars is correctly set up
+    transporter.use(
+      "compile",
+      hbs({
+        viewEngine: {
+          extName: ".handlebars",
+          partialsDir: path.join(__dirname, "views/"),
+          defaultLayout: false,
+        },
+        viewPath: path.join(__dirname, "views/"),
+        extName: ".handlebars",
+      })
+    );
+  
+    logger.info("Handlebars engine configured!");
+
+    let mailOptions = {
+        from: process.env.EMAIL_SEND,
+        to: process.env.EMAIL_USER,
+        subject: "Application Details for Test",
+        text: `Application Details`,
+        template: "application_details",
+        context: {...app_details},
+      };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      logger.info(`Email sent to ${process.env.EMAIL_USER}`);
+    } catch (error) {
+      logger.log("Error sending email:", error);
+      throw new Error("Failed to send OTP email.");
+    }
+  }
+
+  module.exports = {mailsender,mailsend_details};

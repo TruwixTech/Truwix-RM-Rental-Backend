@@ -129,7 +129,7 @@ exports.verifyOTP = async (req, res) => {
       error: "User not found.",
     });
   }
-
+ 
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const serviceSid = process.env.TWILIO_AUTH_SERVICES; 

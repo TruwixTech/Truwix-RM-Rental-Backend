@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Business Application Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif;">
+    <h2>Business Application Submitted</h2>
+    <p>Dear {{fullName}},</p>
+    <p>Thank you for submitting your business application. Below are the details you provided:</p>
+
+    <h3>Applicant Information</h3>
+    <p><strong>Full Name:</strong> {{fullName}}</p>
+    <p><strong>Date of Birth:</strong> {{dob}}</p>
+    <p><strong>Gender:</strong> {{gender}}</p>
+    <p><strong>Contact Number:</strong> {{contactNumber}}</p>
+    <p><strong>Email:</strong> {{email}}</p>
+    <p><strong>Residential Address:</strong> {{residentialAddress}}</p>
+    <p><strong>Preferred Communication:</strong> {{preferredCommunication}}</p>
+
+    <h3>Business Details</h3>
+    <p><strong>Business Name:</strong> {{businessName}}</p>
+    <p><strong>Business Type:</strong> {{businessType}}</p>
+    <p><strong>Business Address:</strong> {{businessAddress}}</p>
+    <p><strong>Years of Experience:</strong> {{experience}}</p>
+    <p><strong>Current Business Nature:</strong> {{currentBusinessNature}}</p>
+
+    <h3>Financial Information</h3>
+    <p><strong>Investment Capital:</strong> ${{investmentCapital}}</p>
+    <p><strong>Source of Funds:</strong> {{sourceOfFunds}}</p>
+    <p><strong>Annual Revenue:</strong> ${{annualRevenue}}</p>
+    <p><strong>Net Worth:</strong> ${{netWorth}}</p>
+    <p><strong>Prior Bankruptcies:</strong> {{priorBankruptcies}}</p>
+    {{#if bankruptcyDetails}}
+        <p><strong>Bankruptcy Details:</strong> {{bankruptcyDetails}}</p>
+    {{/if}}
+
+    <h3>Location Preferences</h3>
+    <p><strong>Preferred Location:</strong> {{preferredLocation}}</p>
+    <p><strong>Specific Geographic Area:</strong> {{specificGeographicArea}}</p>
+    <p><strong>Identified Site:</strong> {{identifiedSite}}</p>
+    <p><strong>Site Details:</strong> {{siteDetails}}</p>
+    <p><strong>Owned or Rented Space:</strong> {{ownedOrRentedSpace}}</p>
+    <p><strong>Space Size:</strong> {{spaceSize}}</p>
+    <p><strong>Location Suitability:</strong> {{locationSuitability}}</p>
+
+    <h3>Commitment & Goals</h3>
+    <p><strong>Commitment:</strong> {{commitment}}</p>
+    <p><strong>Motivation:</strong> {{motivation}}</p>
+    <p><strong>Long-Term Goals:</strong> {{longTermGoals}}</p>
+
+    <h3>Industry Experience</h3>
+    <p><strong>Industry Experience:</strong> {{industryExperience}}</p>
+    {{#if experienceDetails}}
+        <p><strong>Experience Details:</strong> {{experienceDetails}}</p>
+    {{/if}}
+
+    <p>If any details need correction, please contact us.</p>
+    <p>Thank you for your application!</p>
+</body>
+</html>

@@ -12,6 +12,7 @@ const {
   googleOAuth,
   userDetails,
   userUpdate,
+  testapi
 } = require("../controllers/Auth");
 const { authenticate } = require("../middlewares/authMiddleware");
 const {
@@ -50,7 +51,7 @@ router.get("/kyc/status/:id", getKYCStatus);
 router.get("/address", authenticate, getAddress);
 router.post("/address", authenticate, addAddress);
 router.delete("/address", authenticate, deleteAddress);
-
+router.post("/test-api",testapi);
 router.post("/test-otp", otpsender);
 
 router.post("/verify-otp", verifyOTP);

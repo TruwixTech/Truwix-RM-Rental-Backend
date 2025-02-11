@@ -24,6 +24,7 @@ exports.createProduct = async (req, res) => {
       rent6Months,
       rent9Months,
       rent12Months,
+
     } = req.body;
 
     let productImages = img;
@@ -99,19 +100,24 @@ exports.createProductV2 = async (req, res) => {
       title,
       sub_title,
       category,
-      img = [],
       description,
-      month = [],
-      rentalOptions = {},
+      month, 
+      rentalOptions,
       quantity,
-      size
+      size,
+      height,
+      width,
+      weight,
+      hsncode,
     } = req.body;
 
-    let productImages = img;
+    
+    let productImages = [];
+    let hsnbarcode_img = "";
 
-    // Handle file uploads if files are present
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
+    // Handle product images upload
+    if (req.files && req.files["img"]) {
+      for (const file of req.files["img"]) {
         const result = await cloudinary.uploader.upload(file.path, {
           folder: "productImages",
           transformation: [{ width: 500, height: 500, crop: "limit" }],
@@ -120,8 +126,18 @@ exports.createProductV2 = async (req, res) => {
       }
     }
 
+    // Handle HSN barcode image upload (if provided)
+    if (req.files && req.files["hsnbarcode"] && req.files["hsnbarcode"].length > 0) {
+      const file = req.files["hsnbarcode"][0]; // Get the first file
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "hsnbarcode",
+        transformation: [{ width: 500, height: 500, crop: "limit" }],
+      });
+      hsnbarcode_img = result.secure_url;
+    }
+
     // Check for required fields
-    if (!title || !category || !month.length || !img || !quantity) {
+    if (!title || !category || month.length === 0 || productImages.length === 0 || !quantity) {
       return res.status(400).json({
         success: false,
         error: "All Fields Are Necessary",
@@ -153,7 +169,12 @@ exports.createProductV2 = async (req, res) => {
       },
       rentalOptions: rentalOptionsMap,
       quantity,
-      size
+      size,
+      height,
+      width,
+      weight,
+      hsncode,
+      hsnbarcode: hsnbarcode_img, // Store HSN barcode image URL
     });
 
     // Save the product to the database
@@ -164,7 +185,7 @@ exports.createProductV2 = async (req, res) => {
       product,
     });
   } catch (error) {
-    logger.log("Error creating product:", error);
+    console.error("Error creating product:", error);
     return res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -222,67 +243,93 @@ exports.getProductById = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const { title, sub_title, category, existingImages, details, rentalOptions, size, quantity } = req.body;
+    const {
+      title,
+      sub_title,
+      category,
+      existingImages,
+      existingHsnBarcode,
+      details,
+      rentalOptions,
+      size,
+      quantity,
+      height,
+      width,
+      weight,
+      hsncode,
+    } = req.body;
 
-    // Parse details if sent as a string
-    const parsedDetails = typeof details === "string" ? JSON.parse(details) : details;
-
-    // Extract description and month from parsed details
-    const descExtracted = parsedDetails.description;
-    const monthExtracted = Array.isArray(parsedDetails.month) ? parsedDetails.month : [];
-
-    // Initialize img with existing images from the request
+    // Initialize images
     let newImg = existingImages ? (Array.isArray(existingImages) ? existingImages : [existingImages]) : [];
 
-    // Add any new files uploaded to the img array
-    if (req.files && req.files.length > 0) {
-      const results = await Promise.all(
-        req.files.map((file) =>
+    // Initialize HSN barcode
+    let newHsnBarcode = existingHsnBarcode || "";
+
+    // Upload new product images
+    if (req.files?.img) {
+      const uploadResults = await Promise.all(
+        req.files.img.map((file) =>
           cloudinary.uploader.upload(file.path, {
             folder: "productImages",
             transformation: [{ width: 500, height: 500, crop: "limit" }],
           })
         )
       );
-      const uploadedImages = results.map((result) => result.secure_url);
-      newImg = [...newImg, ...uploadedImages]; // Combine existing and new images
+      newImg = [...newImg, ...uploadResults.map((result) => result.secure_url)];
     }
 
-    // Filter out null, undefined, or empty images
+    // Upload new HSN barcode image (if provided)
+    if (req.files?.hsnbarcode?.length > 0) {
+      const barcodeResult = await cloudinary.uploader.upload(req.files.hsnbarcode[0].path, {
+        folder: "hsnbarcodes",
+        transformation: [{ width: 500, height: 500, crop: "limit" }],
+      });
+      newHsnBarcode = barcodeResult.secure_url;
+    }
+
+    // Filter out null or empty images
     newImg = newImg.filter((image) => image && image.trim() !== "");
 
-    // Parse rentalOptions if it's sent as a string
-    const parsedRentalOptions = typeof rentalOptions === "string" ? JSON.parse(rentalOptions) : rentalOptions;
+    // Parse rental options safely
+    let parsedRentalOptions = {};
+    try {
+      parsedRentalOptions = typeof rentalOptions === "string" ? JSON.parse(rentalOptions) : rentalOptions;
+    } catch (err) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid JSON format in rentalOptions",
+      });
+    }
 
-    // Find and update the product by its ID
+    // Find and update the product
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       {
         title,
         sub_title,
-        img: newImg, // Updated images array
+        img: newImg,
         quantity,
         category,
-        details: {
-          description: descExtracted,
-          month: monthExtracted,
-        },
+        details: { description, month },
         size,
         rentalOptions: parsedRentalOptions,
+        height,
+        width,
+        weight,
+        hsncode,
+        hsnbarcode: newHsnBarcode,
       },
       { new: true, runValidators: true }
     );
 
-    // If the product is not found, return a 404 response
     if (!product) {
       return res.status(404).json({ success: false, error: "Product not found" });
     }
 
-    // Return the updated product
     res.status(200).json({ success: true, data: product });
   } catch (error) {
-    logger.error("Error updating product:", error);
-    res.status(400).json({ success: false, error: error.message });
+    console.error("Error updating product:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 };
 

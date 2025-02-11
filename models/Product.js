@@ -53,6 +53,21 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, "quantity is Required"],
     },
+    height:{
+      type:String
+    },
+    width:{
+      type:String
+    },
+    weigth:{
+      type:String
+    },
+    hsncode:{
+      type:String
+    },
+    hsnbarcode:{
+      type: String
+    },
   },
   { timestamps: true }
 );

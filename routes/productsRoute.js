@@ -28,7 +28,10 @@ router.post(
   "/add-product-v2",
   authenticate,
   authorizeAdmin,
-  upload.array("img", 5),
+  upload.fields([
+    { name: "img", maxCount: 5 },
+    { name: "hsnbarcode", maxCount: 1 }
+  ]),
   productsController.createProductV2
 );
 router.get("/", productsController.getProducts);
@@ -38,7 +41,10 @@ router.put(
   "/:id",
   authenticate,
   authorizeAdmin,
-  upload.array("img", 5), // Handle up to 5 new images
+  upload.fields([
+    { name: "img", maxCount: 5 },
+    { name: "hsnbarcode", maxCount: 1 }
+  ]),
   productsController.updateProduct
 );
 

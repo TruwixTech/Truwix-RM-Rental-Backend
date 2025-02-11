@@ -123,7 +123,7 @@ exports.verifyOTP = async (req, res) => {
   
   console.log("Received verification request for:", mobileNumber, "with code:", code);
 
-  const gotUser = await USER.findOne({ mobileNumber });
+  const gotUser = await USER.findOne({ mobileNumber }).select("-password")
 
   if (!gotUser) {
     return res.status(404).json({
@@ -131,7 +131,7 @@ exports.verifyOTP = async (req, res) => {
       error: "User not found.",
     });
   }
-
+ 
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const serviceSid = process.env.TWILIO_AUTH_SERVICES; 

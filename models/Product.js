@@ -53,9 +53,24 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, "quantity is Required"],
     },
-    discount:{
+    discount: {
       type: Number
-    }
+    },
+    height: {
+      type: String
+    },
+    width: {
+      type: String
+    },
+    weight: {
+      type: String
+    },
+    hsncode: {
+      type: String
+    },
+    hsnbarcode: {
+      type: String
+    },
   },
   { timestamps: true }
 );

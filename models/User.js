@@ -36,6 +36,17 @@ const userSchema = mongoose.Schema(
       // required: true,
       length: 10,
     },
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: USER
+    },
+    referredBonusUsed: {
+      type: Boolean,
+      default: false
+    },
+    referredCode: {
+      type: String
+    },
     role: {
       type: String,
       enum: [ADMIN, USER],

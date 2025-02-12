@@ -31,7 +31,7 @@ async function updateProductQuantities(productsToUpdate) {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId, amenities } = req.body;
+    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId, amenities, referredBonusUsed } = req.body;
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -84,7 +84,7 @@ exports.createOrder = async (req, res) => {
       MUID,
       merchantTransactionId: transactionId,
       redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
-      callbackUrl: `https://rmfurniturerental.in/`,
+      callbackUrl: `http://localhost:4000/`,
       redirectMode: "REDIRECT",
       paymentInstrument: {
         type: "PAY_PAGE",
@@ -104,7 +104,7 @@ exports.createOrder = async (req, res) => {
       merchantTransactionId: transactionId,
       amenities,
       redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
-      callbackUrl: `https://rmfurniturerental.in/`,
+      callbackUrl: `http://localhost:4000/`,
       redirectMode: "REDIRECT",
       paymentInstrument: {
         type: "PAY_PAGE",
@@ -140,6 +140,7 @@ exports.createOrder = async (req, res) => {
         if (response.status === 200 && response.data.success) {
           const orderCreated = await Order.create(orderData2);
           user.orders.push(orderCreated._id);
+          user.referredBonusUsed = referredBonusUsed
           updateProductQuantities(cartItems);
           await user.save();
           res.json(response.data); // Send payment response to the frontend
@@ -681,7 +682,7 @@ exports.addToCart = async (req, res) => {
 exports.getCart = async (req, res) => {
   try {
     const cart = await CartSchema.findOne({ user: req.user.id }).populate(
-      "items.product"
+      "items.product user"
     );
     res.status(200).json({ success: true, data: cart });
   } catch (error) {

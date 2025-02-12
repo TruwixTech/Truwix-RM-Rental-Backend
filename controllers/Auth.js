@@ -378,7 +378,7 @@ exports.getAddress = async (req, res) => {
   }
 };
 
-exports.testapi = async (req,res) => {
+exports.submitHelpSupport = async (req,res) => {
     try
     {
       const app_details = req.body; 
@@ -399,7 +399,7 @@ exports.testapi = async (req,res) => {
     }
 }
 
-exports.testapi2 = async (req,res) => {
+exports.submitFranchise = async (req,res) => {
     try
     {
       const app_details = req.body; 

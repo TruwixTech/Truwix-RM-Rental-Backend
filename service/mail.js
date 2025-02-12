@@ -114,7 +114,7 @@ async function mailsender(orderId,productsWithDetails,res_email) {
 
     let mailOptions = {
         from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_SEND,
+        to: process.env.EMAIL_USER,
         subject: "Application Details for Test",
         text: `Application Details`,
         template: templateName,

@@ -12,8 +12,8 @@ const {
   googleOAuth,
   userDetails,
   userUpdate,
-  testapi,
-  testapi2
+  submitFranchise,
+  submitHelpSupport
 } = require("../controllers/Auth");
 const { authenticate } = require("../middlewares/authMiddleware");
 const {
@@ -52,9 +52,9 @@ router.get("/kyc/status/:id", getKYCStatus);
 router.get("/address", authenticate, getAddress);
 router.post("/address", authenticate, addAddress);
 router.delete("/address", authenticate, deleteAddress);
-router.post("/test-api",testapi);
+router.post("/submit-help-support", authenticate, submitHelpSupport);
 router.post("/test-otp", otpsender);
-router.post("/test-api-2",testapi2);
+router.post("/franchise-form", submitFranchise);
 router.post("/verify-otp", verifyOTP);
 // admin kyc routes
 

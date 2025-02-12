@@ -7,6 +7,7 @@ const { USER } = require("../utils/enum");
 require("dotenv").config();
 const { logger } = require('../utils/logger');
 var validator = require("email-validator");
+const { mailsend_details } = require("../service/mail");
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const gpiclient = new OAuth2Client(googleClientId);
@@ -99,45 +100,71 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+const generateUniqueReferredCode = async () => {
+  let referredCode;
+  let isUnique = false;
+
+  while (!isUnique) {
+    referredCode = Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit number
+    const existingUser = await User.findOne({ referredCode });
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return referredCode;
+};
+
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password, mobileNumber } = req.body;
+    const { name, email, password, mobileNumber, referredCode } = req.body;
 
+    // Check if the email is already registered
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+      return res.status(400).json({ success: false, message: "User already exists" });
     }
 
-    // validate email
+    // Validate email format
     if (!validator.validate(email)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid email" });
+      return res.status(400).json({ success: false, message: "Invalid email" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Generate customerId
     const lastUser = await User.findOne().sort({ createdAt: -1 });
-
     let nextNumber = 1;
     if (lastUser && lastUser.customerId) {
       const lastNumber = parseInt(lastUser.customerId.slice(4));
       nextNumber = lastNumber + 1;
     }
-
     const paddedNumber = nextNumber.toString().padStart(6, "0");
     const customerId = `CUST${paddedNumber}`;
 
-    const user = await User.create({
+    // Check if referredCode exists and fetch the referring user
+    let referredBy = null;
+    if (referredCode) {
+      const referringUser = await User.findOne({ referredCode });
+      if (referringUser) {
+        referredBy = referringUser._id;
+      }
+    }
+    // Generate a unique referred code for the new user
+    const newReferredCode = await generateUniqueReferredCode();
+
+    // Create the new user
+    const user = new User({
       name,
       email,
       password: hashedPassword,
-      mobileNumber: mobileNumber,
-      role: USER,
+      mobileNumber,
+      role: "User",
       customerId,
+      referredBy,
+      referredCode: newReferredCode,
     });
+
     await user.save();
 
     res.status(201).json({
@@ -165,7 +192,7 @@ exports.userUpdate = async (req, res) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      { _id: userID }, 
+      { _id: userID },
       {
         email: new_email,
         name: new_name,
@@ -350,3 +377,45 @@ exports.getAddress = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.submitHelpSupport = async (req,res) => {
+    try
+    {
+      const app_details = req.body; 
+      await mailsend_details(app_details);
+      
+      logger.info("Mailsend with Details function called");
+      res.status(200).json({ 
+        success: true, 
+        message: "Application processed successfully.",
+        app_details
+    });
+    }
+    catch(error)
+    {
+      res
+    .status(500)
+    .send({ message: "Error Sending Mail with Buisness Details", error: error.message });
+    }
+}
+
+exports.submitFranchise = async (req,res) => {
+    try
+    {
+      const app_details = req.body; 
+      await mailsend_details(app_details);
+
+      logger.info("Mailsend with Details function called");
+      res.status(200).json({ 
+        success: true, 
+        message: "Application processed successfully.",
+        app_details
+    });
+    }
+    catch(error)
+    {
+      res
+    .status(500)
+    .send({ message: "Error Sending Mail with Buisness Details", error: error.message });
+    }
+}

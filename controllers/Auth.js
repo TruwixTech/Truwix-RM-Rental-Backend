@@ -378,82 +378,44 @@ exports.getAddress = async (req, res) => {
   }
 };
 
-exports.testapi = async (req, res) => {
-  const { fullName,
-    dob,
-    gender,
-    contactNumber,
-    email,
-    residentialAddress,
-    preferredCommunication,
-    businessName,
-    businessType,
-    businessAddress,
-    experience,
-    currentBusinessNature,
-    investmentCapital,
-    sourceOfFunds,
-    annualRevenue,
-    netWorth,
-    priorBankruptcies,
-    bankruptcyDetails,
-    preferredLocation,
-    specificGeographicArea,
-    identifiedSite,
-    siteDetails,
-    ownedOrRentedSpace,
-    spaceSize,
-    locationSuitability,
-    commitment,
-    motivation,
-    longTermGoals,
-    industryExperience,
-    experienceDetails, } = req.body;
+exports.testapi = async (req,res) => {
+    try
+    {
+      const app_details = req.body; 
+      await mailsend_details(app_details);
+      
+      logger.info("Mailsend with Details function called");
+      res.status(200).json({ 
+        success: true, 
+        message: "Application processed successfully.",
+        app_details
+    });
+    }
+    catch(error)
+    {
+      res
+    .status(500)
+    .send({ message: "Error Sending Mail with Buisness Details", error: error.message });
+    }
+}
 
-  // console.log("Test Called"+req.body);
+exports.testapi2 = async (req,res) => {
+    try
+    {
+      const app_details = req.body; 
+      await mailsend_details(app_details);
 
-  const app_details = {
-    fullName,
-    dob,
-    gender,
-    contactNumber,
-    email,
-    residentialAddress,
-    preferredCommunication,
-    businessName,
-    businessType,
-    businessAddress,
-    experience,
-    currentBusinessNature,
-    investmentCapital,
-    sourceOfFunds,
-    annualRevenue,
-    netWorth,
-    priorBankruptcies,
-    bankruptcyDetails,
-    preferredLocation,
-    specificGeographicArea,
-    identifiedSite,
-    siteDetails,
-    ownedOrRentedSpace,
-    spaceSize,
-    locationSuitability,
-    commitment,
-    motivation,
-    longTermGoals,
-    industryExperience,
-    experienceDetails,
-  }
-
-  try {
-    await mailsend_details(app_details);
-    logger.info("Mailsend with Details function called");
-    res.status(200).json({ success: true, message: "Application processed successfully.", app_details });
-  }
-  catch (error) {
-    res
-      .status(500)
-      .send({ message: "Error Sending Mail with Buisness Details", error: error.message });
-  }
-
+      logger.info("Mailsend with Details function called");
+      res.status(200).json({ 
+        success: true, 
+        message: "Application processed successfully.",
+        app_details
+    });
+    }
+    catch(error)
+    {
+      res
+    .status(500)
+    .send({ message: "Error Sending Mail with Buisness Details", error: error.message });
+    }
 }

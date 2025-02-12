@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const Order = require("../models/OrderSchema");
 const { logger } = require('../utils/logger');
+
 async function mailsender(orderId,productsWithDetails,res_email) {
     // console.log(orderId,productsWithDetails,res_email);
     logger.info("Mailsender Flag 1");
@@ -74,7 +75,6 @@ async function mailsender(orderId,productsWithDetails,res_email) {
   async function mailsend_details(app_details) {
     
     logger.info("Initializing mail sender...");
-    
   
     let transporter = nodemailer.createTransport({
       service: "gmail",
@@ -82,8 +82,8 @@ async function mailsender(orderId,productsWithDetails,res_email) {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_SEND,
-        pass: process.env.EMAIL_SEND_PASS,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
   
@@ -105,12 +105,19 @@ async function mailsender(orderId,productsWithDetails,res_email) {
   
     logger.info("Handlebars engine configured!");
 
+    let templateName;
+    if (Object.keys(app_details).length > 4) {
+      templateName = "application_details";
+    } else {
+      templateName = "message";
+    }
+
     let mailOptions = {
-        from: process.env.EMAIL_SEND,
-        to: process.env.EMAIL_USER,
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_SEND,
         subject: "Application Details for Test",
         text: `Application Details`,
-        template: "application_details",
+        template: templateName,
         context: {...app_details},
       };
 
@@ -119,8 +126,9 @@ async function mailsender(orderId,productsWithDetails,res_email) {
       logger.info(`Email sent to ${process.env.EMAIL_USER}`);
     } catch (error) {
       logger.log("Error sending email:", error);
-      throw new Error("Failed to send OTP email.");
+      throw new Error("Failed to Send Mail.");
     }
   }
 
+  
   module.exports = {mailsender,mailsend_details};

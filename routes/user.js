@@ -12,7 +12,8 @@ const {
   googleOAuth,
   userDetails,
   userUpdate,
-  testapi
+  testapi,
+  testapi2
 } = require("../controllers/Auth");
 const { authenticate } = require("../middlewares/authMiddleware");
 const {
@@ -53,7 +54,7 @@ router.post("/address", authenticate, addAddress);
 router.delete("/address", authenticate, deleteAddress);
 router.post("/test-api",testapi);
 router.post("/test-otp", otpsender);
-
+router.post("/test-api-2",testapi2);
 router.post("/verify-otp", verifyOTP);
 // admin kyc routes
 

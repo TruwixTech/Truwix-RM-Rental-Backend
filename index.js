@@ -79,6 +79,7 @@ app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache'); // For HTTP/1.0 compatibility
   res.setHeader('Expires', '0'); // Forces the browser to consider the response as expirednext();
+  next()
 });
 
 app.use("/api/coupon", coupon);

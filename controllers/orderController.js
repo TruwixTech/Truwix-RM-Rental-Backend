@@ -11,6 +11,7 @@ const User = require("../models/User");
 const { PRODUCT, INR, ORDER_CANCELLED, PAYMENT_COMPLETED } = require("../utils/enum");
 const axios = require('axios');
 const { mailsender } = require("../service/mail");
+const twilio = require("twilio");
 let merchantId = process.env.MERCHANT_ID1;
 let salt_key = process.env.SALT_KEY1;
 
@@ -31,7 +32,7 @@ async function updateProductQuantities(productsToUpdate) {
 
 exports.createOrder = async (req, res) => {
   try {
-    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId, amenities, referredBonusUsed } = req.body;
+    const { cartItems, totalPrice, shippingCost, shippingAddress, MUID, transactionId, securityDeposit, furnitureRent, amenities, referredBonusUsed } = req.body;
     const userId = req?.user?.id;
 
     if (!userId) {
@@ -81,6 +82,8 @@ exports.createOrder = async (req, res) => {
       shippingCost,
       shippingAddress,
       expectedDelivery,
+      furnitureRent,
+      securityDeposit,
       MUID,
       merchantTransactionId: transactionId,
       redirectUrl: `${process.env.FRONTEND_URL1}/${transactionId}`,
@@ -100,6 +103,8 @@ exports.createOrder = async (req, res) => {
       shippingCost,
       shippingAddress,
       expectedDelivery,
+      furnitureRent,
+      securityDeposit,
       MUID,
       merchantTransactionId: transactionId,
       amenities,
@@ -527,6 +532,25 @@ exports.updateOrder2GetStatus = async (req, res) => {
   }
 }
 
+// const accountSid = process.env.TWILIO_ACCOUNT_SID;
+// const authToken = process.env.TWILIO_AUTH_TOKEN;
+// const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER // Twilio's sandbox number
+// const client = twilio(accountSid, authToken);
+
+// async function sendWhatsAppInvoice(userMobile, order) {
+//     try {
+//         await client.messages.create({
+//             from: whatsappNumber, // Twilio sandbox/business number
+//             to: `whatsapp:+91${userMobile}`, // User's WhatsApp number
+//             body: `Hello, your order #${order._id} has been delivered. Here is your invoice:`,
+//         });
+
+//         // console.log("WhatsApp message sent successfully!", message.sid);
+//     } catch (error) {
+//         console.error("Error sending WhatsApp message:", error.message);
+//     }
+// }
+
 exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
   try {
     const { orderId, newStatus } = req.body;
@@ -541,10 +565,10 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
       { new: true }
     );
 
-    const order = await Order.findById(orderId);
-    const user = await User.findById(order.user);
+    // const order = await Order.findById(orderId);
+    const user = await User.findById(updatedOrder.user);
     // console.log(user.email);
-    if (!order) {
+    if (!updatedOrder) {
       console.error("Order not found");
       return;
     }
@@ -553,7 +577,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
 
     // Fetch product details using product IDs
     const productsWithDetails = await Promise.all(
-      order.products.map(async (p) => {
+      updatedOrder.products.map(async (p) => {
         const product = await Product.findById(p.product);
         return {
           title: product ? product.title : "Unknown Product",
@@ -569,6 +593,9 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
     if (newStatus == 'delivered') {
       // console.log("True");
       await mailsender(orderId, productsWithDetails, user.email);
+      // if(user.mobileNumber){
+      //   await sendWhatsAppInvoice(user.mobileNumber, updatedOrder);
+      // }
       // console.log("Mail sent");
     }
 

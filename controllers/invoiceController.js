@@ -116,9 +116,9 @@ exports.downloadInvoicePdf = async (req, res) => {
     doc.pipe(res);
 
     doc.fontSize(25).text("RM Rental", { align: "center" }).moveDown(0.5);
-    doc.fontSize(12).text("Address: 123 Main Street, City, State, ZIP", { align: "center" });
-    doc.text("Phone: +1 234-567-890", { align: "center" });
-    doc.text("Email: contact@yourcompany.com", { align: "center" });
+    doc.fontSize(12).text("Address: Old barat Ghar, Makanpur, Nyay Khand 2, Indirapuram, Ghaziabad, Uttar Pradesh 201014", { align: "center" });
+    doc.text("Phone: +91 9306839435", { align: "center" });
+    doc.text("Email: rmfurniture2020@gmail.com", { align: "center" });
     doc.moveDown();
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown().fontSize(20).text(`Invoice`, { align: "center" });

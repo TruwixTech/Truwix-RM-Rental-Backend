@@ -19,11 +19,6 @@ const InvoiceSchema = new mongoose.Schema({
   invoiceNumber: { type: String, unique: true },
   orderId: {type: mongoose.Schema.Types.ObjectId, ref: ORDER, required: true},
   userId: { type: mongoose.Schema.Types.ObjectId, ref: USER, required: true },
-  orderId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Order',
-    required: true,
-  },
   paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment', required: true },
   amount: { type: Number, required: true },
   currency: { type: String, default: INR },

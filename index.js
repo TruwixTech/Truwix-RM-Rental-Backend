@@ -43,12 +43,12 @@ const allowedOrigins = [
 // app.options("*", cors());
 
 const corsOptions = {
-  origin: function(origin, callback){
-      if(!origin || allowedOrigins.indexOf(origin) !== -1){
-          callback(null, true); // Allow the origin
-      }else{
-          callback(new Error('Origin not allowed by Cors'));
-      }
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true); // Allow the origin
+    } else {
+      callback(new Error('Origin not allowed by Cors'));
+    }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -75,10 +75,16 @@ const order = require("./routes/orderRoute");
 const coupon = require("./routes/couponRoute");
 const invoice = require("./routes/invoiceRoute");
 
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache'); // For HTTP/1.0 compatibility
+  res.setHeader('Expires', '0'); // Forces the browser to consider the response as expirednext();
+});
+
 app.use("/api/coupon", coupon);
 app.use("/api", order);
 app.use("/api/invoice", invoice);
 
 app.listen(PORT, () => {
-    logger.info(`App listening on port ${PORT}`);
+  logger.info(`App listening on port ${PORT}`);
 });

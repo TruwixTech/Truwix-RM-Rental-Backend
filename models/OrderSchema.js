@@ -71,6 +71,14 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    furnitureRent: {
+      type: Number,
+      default: 0
+    },
+    securityDeposit: {
+      type: Number,
+      default: 0
+    },
     shippingAddress: {
       type: Object,
     },
@@ -90,7 +98,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["UNPAID", "PAID"],
       default: "UNPAID"
     },
-    feedback:{
+    feedback: {
       type: String
     }
   },

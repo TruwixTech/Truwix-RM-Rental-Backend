@@ -36,7 +36,7 @@ const {
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
 const upload = multer({ storage });
-const { getDistance } = require("../controllers/shippingController");
+const { getDistance, getDistanceByPincode } = require("../controllers/shippingController");
 
 router.post("/oauth", googleOAuth);
 router.post("/user-details", userDetails)
@@ -64,5 +64,7 @@ router.get("/order/orders/:id", getMyOrderProductNames);
 router.put("/order/cancel/:id", cancelOrder);
 
 router.post("/shipping", getDistance);
+
+router.post("/get-adress", getDistanceByPincode);
 
 module.exports = router;

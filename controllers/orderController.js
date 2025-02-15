@@ -593,6 +593,7 @@ exports.updateOrderFromAdminOrdersSidebar = async (req, res) => {
     if (newStatus == 'delivered') {
       // console.log("True");
       await mailsender(orderId, productsWithDetails, user.email);
+      await mailsender(orderId, productsWithDetails, 'rmfurniture2020@gmail.com');
       // if(user.mobileNumber){
       //   await sendWhatsAppInvoice(user.mobileNumber, updatedOrder);
       // }

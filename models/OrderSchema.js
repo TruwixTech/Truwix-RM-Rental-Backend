@@ -18,9 +18,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     amenities: {
-      type: Boolean,
-      required: true,
-      default: false,
+      type: String,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

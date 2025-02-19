@@ -22,7 +22,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
 
               # Now we have got the access of EC2 and we will start the deploy .
-              cd /home/ubuntu/apps/dev/Truwix-RM-Rental-Backend &&
+              cd /home/ubuntu/dev/Truwix-RM-Rental-Backend &&
               git pull &&
               npm install --force && 
               (pm2 restart "RM-Rental-Dev" || pm2 start npm --name "RM-Rental-Dev" -- run start:prod)
